@@ -50,7 +50,7 @@ function ProductCard({ product }: { product: Product }) {
   const wishlisted = isWishlisted(product._id);
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-[#f0dde0] bg-white shadow-sm transition-shadow hover:shadow-md">
+    <div className="group flex flex-col overflow-hidden bg-white shadow-sm transition-shadow hover:shadow-md">
       <Link href={`/products/${product._id}`} className="relative block aspect-3/4 overflow-hidden bg-[#fdf5f5]">
         {img ? (
           <Image
@@ -58,7 +58,7 @@ function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             fill
             sizes="(min-width:1024px) 25vw,(min-width:640px) 33vw,50vw"
-            className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center">
@@ -401,7 +401,7 @@ function ProductsPageInner() {
             {isLoading ? (
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
                 {[...Array(12)].map((_, i) => (
-                  <div key={i} className="overflow-hidden rounded-2xl border border-[#f0dde0] bg-white">
+                  <div key={i} className="overflow-hidden bg-white">
                     <div className="aspect-3/4 animate-pulse bg-brand-100" />
                     <div className="space-y-2 p-3">
                       <div className="h-3 w-4/5 animate-pulse rounded bg-[#f4dedb]" />
