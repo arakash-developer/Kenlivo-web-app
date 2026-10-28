@@ -8,6 +8,7 @@ import { ShoppingCart, Heart, Star, ChevronDown, SlidersHorizontal, X, ChevronLe
 import { useProducts, useCategories } from "@/hooks/useProducts";
 import type { Product } from "@/lib/api/types";
 import { useCart } from "@/lib/cart/cartContext";
+import { useWishlist } from "@/lib/wishlist/wishlistContext";
 import type { ProductType } from "@/types/AllDataType";
 
 const SORT_OPTIONS = [
@@ -44,11 +45,13 @@ function ProductCard({ product }: { product: Product }) {
   const img = product.images?.[0];
   const hasDiscount = product.discountPercentage > 0;
   const { addToCart, items } = useCart();
+  const { toggleWishlist, isWishlisted } = useWishlist();
   const added = items.some((i) => i.product._id === product._id);
+  const wishlisted = isWishlisted(product._id);
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-[#f0dde0] bg-white shadow-sm transition-shadow hover:shadow-md">
-      <Link href={`/products/${product._id}`} className="relative block aspect-[3/4] overflow-hidden bg-[#fdf5f5]">
+      <Link href={`/products/${product._id}`} className="relative block aspect-4/5 overflow-hidden bg-[#fdf5f5]">
         {img ? (
           <Image
             src={img}
@@ -67,8 +70,11 @@ function ProductCard({ product }: { product: Product }) {
             -{product.discountPercentage}%
           </span>
         )}
-        <button className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/80 text-[#987b7e] shadow-sm backdrop-blur-sm transition hover:bg-white hover:text-[#c96778]">
-          <Heart className="size-4" />
+        <button
+          onClick={(e) => { e.preventDefault(); toggleWishlist(product as unknown as ProductType); }}
+          className="absolute right-3 top-3 flex size-8 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition hover:bg-white"
+        >
+          <Heart className={`size-4 ${wishlisted ? "fill-brand-600 text-brand-600" : "text-muted-500"}`} />
         </button>
       </Link>
 
@@ -396,7 +402,7 @@ function ProductsPageInner() {
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
                 {[...Array(12)].map((_, i) => (
                   <div key={i} className="overflow-hidden rounded-2xl border border-[#f0dde0] bg-white">
-                    <div className="aspect-[3/4] animate-pulse bg-[#fce8e6]" />
+                    <div className="aspect-4/5 animate-pulse bg-brand-100" />
                     <div className="space-y-2 p-3">
                       <div className="h-3 w-4/5 animate-pulse rounded bg-[#f4dedb]" />
                       <div className="h-3 w-3/5 animate-pulse rounded bg-[#f4dedb]" />
