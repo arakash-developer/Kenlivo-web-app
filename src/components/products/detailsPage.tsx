@@ -15,7 +15,6 @@ import { EditButton } from "../cards/productsEditButtonCard";
 import DeleteButton from "../cards/productsDeleteButtonCard";
 import { useState } from "react";
 import { ProductType } from "@/types/AllDataType";
-import Image from "next/image";
 import OrderSummaryCard from "../cards/orderSummaryCard";
 
 const shades = [
@@ -40,12 +39,11 @@ export default function DetailsPage({
   const [added, setAdded] = useState(false);
   const [favorite, setFavorite] = useState(false);
   const [order, setOrder] = useState(false);
-  const gallery = [
-    { label: "Product", icon: "💄" },
-    { label: "Lipstick", icon: "💋" },
-    { label: "Texture", icon: "🎨" },
-    { label: "Swatches", icon: "✨" },
-  ];
+  const gallery: string[] = productData?.images?.length
+    ? productData.images
+    : productData?.imageUrl
+    ? [productData.imageUrl]
+    : [];
   const tabContent: Record<string, string> = {
     Description: productData?.description,
   };
@@ -88,34 +86,35 @@ export default function DetailsPage({
             <div className="grid grid-cols-[48px_minmax(0,1fr)] gap-3 sm:grid-cols-[62px_minmax(0,1fr)]">
               {/* Thumbnails */}
               <div className="flex flex-col gap-2">
-                {gallery.map((item, index) => (
+                {gallery.map((src, index) => (
                   <button
-                    key={item.label}
+                    key={index}
                     onClick={() => setActiveImage(index)}
-                    aria-label={`View ${item.label}`}
-                    className={`flex aspect-square items-center justify-center rounded-md border bg-bg-blush text-2xl transition ${
+                    aria-label={`View image ${index + 1}`}
+                    className={`flex aspect-square items-center justify-center overflow-hidden rounded-md border bg-bg-blush transition ${
                       activeImage === index
                         ? "border-brand-cta ring-1 ring-brand-cta/20"
                         : "border-brand-300 hover:border-brand-400"
                     }`}
                   >
-                    {item.icon}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
 
               {/* Main image area */}
               <div className="relative flex aspect-[1.05/1] min-h-[280px] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-bg-page via-bg-blush to-brand-200 sm:min-h-[380px]">
-                <Image
-                  src={
-                    productData?.images?.[0] ||
-                    productData?.imageUrl ||
-                    "https://placehold.co/500x500/fdf5f5/c2aaab?text=No+Image"
-                  }
-                  width={500}
-                  height={500}
-                  alt={productData?.name || "products"}
-                />
+                {gallery.length > 0 ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={gallery[activeImage] ?? gallery[0]}
+                    alt={productData?.name || "product"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-sm text-muted-400">No Image</span>
+                )}
 
                 <button
                   onClick={() => setFavorite(!favorite)}
@@ -134,11 +133,11 @@ export default function DetailsPage({
 
             {/* Gallery indicators */}
             <div className="mt-4 flex justify-center gap-2 lg:justify-start lg:pl-[75px]">
-              {gallery.map((item, index) => (
+              {gallery.map((_, index) => (
                 <button
-                  key={item.label}
+                  key={index}
                   onClick={() => setActiveImage(index)}
-                  aria-label={`Select ${item.label}`}
+                  aria-label={`Select image ${index + 1}`}
                   className={`h-1.5 rounded-full transition-all ${
                     activeImage === index
                       ? "w-8 bg-brand-deep"
