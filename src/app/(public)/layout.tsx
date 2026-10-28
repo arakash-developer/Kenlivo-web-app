@@ -5,7 +5,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <Navbar />
-      <main className="bg-[#FFF9F2]">{children}</main>
+      <main className="bg-[#FFF9F2] pt-[142px]">{children}</main>
       <Footer />
     </>
   );

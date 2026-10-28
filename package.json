@@ -6,7 +6,8 @@
     "dev": "next dev -p 5170",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "docker:dev": "docker compose watch"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

@@ -2,11 +2,19 @@ export interface ProductType {
   _id: string
   name: string
   category: string
-  price: string
+  price: number
+  finalPrice?: number
+  discountPercentage?: number
   discount?: string | number
-  producttagline: string
-  imageUrl: string
+  tagline?: string
+  producttagline?: string
+  images?: string[]
+  imageUrl?: string
   description: string
+  rating?: number
+  numReviews?: number
+  stock?: number
+  isActive?: boolean
 }
 
 export interface OrderDataType {

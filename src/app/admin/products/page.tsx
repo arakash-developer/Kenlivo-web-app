@@ -21,7 +21,7 @@ export default function AdminProductsPage() {
   const catName = (p: Product) => {
     if (!p.category) return "—";
     if (typeof p.category === "string") {
-      return cats?.find((c) => c._id === p.category)?.name ?? "—";
+      return cats?.items?.find((c) => c._id === p.category)?.name ?? "—";
     }
     return p.category.name;
   };
