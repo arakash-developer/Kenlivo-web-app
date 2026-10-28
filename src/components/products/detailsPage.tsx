@@ -47,12 +47,12 @@ export default function DetailsPage({
     ? [productData.imageUrl]
     : [];
   const tabContent: Record<string, string> = {
-    Description: productData?.description,
+    Description: productData?.description ?? "",
   };
   if (order) {
     return (
       <div className="w-full">
-        <OrderSummaryCard productData={productData} />
+        <OrderSummaryCard productData={productData as ProductType} />
       </div>
     );
   }
@@ -76,8 +76,8 @@ export default function DetailsPage({
             <span className="text-brand-deep">{productData?.name}</span>
           </nav>
           <div className="flex items-center gap-3">
-            <EditButton product={productData || {}} />
-            <DeleteButton product={productData || {}} />
+            <EditButton product={(productData ?? {}) as ProductType} />
+            <DeleteButton product={(productData ?? {}) as ProductType} />
           </div>
         </div>
 
@@ -214,7 +214,7 @@ export default function DetailsPage({
             {/* Purchase buttons */}
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
-                onClick={() => addToCart(productData, quantity)}
+                onClick={() => addToCart(productData as ProductType, quantity)}
                 className="flex h-12 items-center justify-center gap-2 rounded-md bg-brand-cta px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 active:scale-[0.99]"
               >
                 <ShoppingBag size={17} />
