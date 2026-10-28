@@ -139,7 +139,7 @@ export default function LoginForm({
 
                   <Button
                     type="submit"
-                    disabled={login.isPending}
+                    isDisabled={login.isPending}
                     className="h-12 w-full rounded-xl bg-[#c96778] text-sm font-semibold text-white shadow-md shadow-[#c96778]/20 transition-all hover:bg-[#ad5064] hover:shadow-lg"
                   >
                     {!login.isPending && <ArrowRight className="mr-2 size-4" />}
