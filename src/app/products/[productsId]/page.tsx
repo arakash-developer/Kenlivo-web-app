@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import DetailsPage from "@/components/products/detailsPage";
 import { Navbar } from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { getDb, toId } from "@/lib/v1/db";
 
 export default async function ProductDetailsPage({
   params,
@@ -11,11 +12,17 @@ export default async function ProductDetailsPage({
   const { productsId } = await params;
   let data = null;
   try {
-    const base = process.env.API_URL
-      ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/api/v1` : "http://localhost:3000/api/v1");
-    const res = await fetch(`${base}/products/${productsId}`, { cache: "no-store" });
-    const json = await res.json();
-    data = json?.data ?? json;
+    const oid = toId(productsId);
+    if (oid) {
+      const db = await getDb();
+      const [product] = await db.collection("products").aggregate([
+        { $match: { _id: oid } },
+        { $lookup: { from: "categories", localField: "category", foreignField: "_id", as: "category" } },
+        { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+        { $addFields: { _id: { $toString: "$_id" }, "category._id": { $toString: "$category._id" } } },
+      ]).toArray();
+      data = product ?? null;
+    }
   } catch {
     // data stays null
   }

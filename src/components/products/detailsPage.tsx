@@ -40,7 +40,7 @@ export default function DetailsPage({
   const [favorite, setFavorite] = useState(false);
   const [order, setOrder] = useState(false);
   const { addToCart, items } = useCart();
-  const added = items.some((i) => i.product._id === productData?._id);
+  const added = productData?._id ? items.some((i) => i.product?._id === productData._id) : false;
   const gallery: string[] = productData?.images?.length
     ? productData.images
     : productData?.imageUrl
