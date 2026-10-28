@@ -11,10 +11,9 @@ export default async function ProductDetailsPage({
   const { productsId } = await params;
   let data = null;
   try {
-    const res = await fetch(
-      `${process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL}/products/${productsId}`,
-      { cache: "no-store" }
-    );
+    const base = process.env.API_URL
+      ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/api/v1` : "http://localhost:3000/api/v1");
+    const res = await fetch(`${base}/products/${productsId}`, { cache: "no-store" });
     const json = await res.json();
     data = json?.data ?? json;
   } catch {

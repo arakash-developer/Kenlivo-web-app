@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ProductType } from "@/types/AllDataType";
 import { Heart, ShoppingCart, Star } from "lucide-react";
+import { api } from "@/lib/api/axios";
 
 export default function TrendingProducts() {
   const [products, setProducts] = useState<ProductType[]>([]);
@@ -10,8 +11,7 @@ export default function TrendingProducts() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?limit=4&sort=-rating`);
-        const data = await res.json();
+        const { data } = await api.get("/products", { params: { limit: 4, sort: "-rating" } });
         setProducts(data?.data ?? data?.items ?? []);
       } catch { /* silent */ }
     };
