@@ -25,8 +25,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("kenlivo_cart");
-      if (saved) setItems(JSON.parse(saved));
-    } catch {}
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setItems(parsed.filter((i) => i?.product?._id));
+        }
+      }
+    } catch {
+      localStorage.removeItem("kenlivo_cart");
+    }
   }, []);
 
   useEffect(() => {
@@ -58,9 +65,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => setItems([]), []);
 
-  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
+  const totalItems = items.reduce((sum, i) => sum + (i?.product ? i.quantity : 0), 0);
   const totalPrice = items.reduce(
-    (sum, i) => sum + (i.product.finalPrice ?? i.product.price ?? 0) * i.quantity,
+    (sum, i) => sum + ((i?.product?.finalPrice ?? i?.product?.price ?? 0) * (i?.quantity ?? 0)),
     0
   );
 
