@@ -7,6 +7,8 @@ import Link from "next/link";
 import { ShoppingCart, Heart, Star, ChevronDown, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProducts, useCategories } from "@/hooks/useProducts";
 import type { Product } from "@/lib/api/types";
+import { useCart } from "@/lib/cart/cartContext";
+import type { ProductType } from "@/types/AllDataType";
 
 const SORT_OPTIONS = [
   { label: "Popularity", value: "-rating" },
@@ -41,6 +43,8 @@ function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
 function ProductCard({ product }: { product: Product }) {
   const img = product.images?.[0];
   const hasDiscount = product.discountPercentage > 0;
+  const { addToCart, items } = useCart();
+  const added = items.some((i) => i.product._id === product._id);
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-[#f0dde0] bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -91,8 +95,11 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        <button className="mt-auto w-full rounded-xl bg-[#c96778] py-2 text-sm font-semibold text-white transition hover:bg-[#ad5064]">
-          Add to Cart
+        <button
+          onClick={() => addToCart(product as unknown as ProductType)}
+          className={`mt-auto w-full rounded-xl py-2 text-sm font-semibold text-white transition ${added ? "bg-emerald-600 hover:bg-emerald-700" : "bg-[#c96778] hover:bg-[#ad5064]"}`}
+        >
+          {added ? "Added ✓" : "Add to Cart"}
         </button>
       </div>
     </div>

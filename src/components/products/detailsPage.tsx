@@ -16,6 +16,7 @@ import DeleteButton from "../cards/productsDeleteButtonCard";
 import { useState } from "react";
 import { ProductType } from "@/types/AllDataType";
 import OrderSummaryCard from "../cards/orderSummaryCard";
+import { useCart } from "@/lib/cart/cartContext";
 
 const shades = [
   { name: "Bombshell", color: "#ed9b8c" },
@@ -36,9 +37,10 @@ export default function DetailsPage({
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("Description");
   const [activeImage, setActiveImage] = useState(0);
-  const [added, setAdded] = useState(false);
   const [favorite, setFavorite] = useState(false);
   const [order, setOrder] = useState(false);
+  const { addToCart, items } = useCart();
+  const added = items.some((i) => i.product._id === productData?._id);
   const gallery: string[] = productData?.images?.length
     ? productData.images
     : productData?.imageUrl
@@ -212,7 +214,7 @@ export default function DetailsPage({
             {/* Purchase buttons */}
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <button
-                onClick={() => setAdded(true)}
+                onClick={() => addToCart(productData, quantity)}
                 className="flex h-12 items-center justify-center gap-2 rounded-md bg-brand-cta px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 active:scale-[0.99]"
               >
                 <ShoppingBag size={17} />

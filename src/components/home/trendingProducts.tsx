@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ProductType } from "@/types/AllDataType";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { api } from "@/lib/api/axios";
+import { useCart } from "@/lib/cart/cartContext";
 
 export default function TrendingProducts() {
   const [products, setProducts] = useState<ProductType[]>([]);
@@ -54,6 +55,8 @@ export default function TrendingProducts() {
 
 function TrendingCard({ product }: { product: ProductType }) {
   const [wished, setWished] = useState(false);
+  const { addToCart, items } = useCart();
+  const added = items.some((i) => i.product._id === product._id);
   const img = product.images?.[0] || product.imageUrl;
   const price = product.finalPrice ?? product.price ?? 0;
   const originalPrice = product.discountPercentage && product.discountPercentage > 0 ? product.price : null;
@@ -100,8 +103,11 @@ function TrendingCard({ product }: { product: ProductType }) {
           <span className="text-base font-bold text-brand-700">৳{Number(price).toLocaleString()}</span>
           {originalPrice && <span className="text-xs text-muted-400 line-through">৳{Number(originalPrice).toLocaleString()}</span>}
         </div>
-        <button className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-700 py-2 text-xs font-semibold text-white transition hover:bg-brand-800">
-          <ShoppingCart className="size-3.5" /> Add to Cart
+        <button
+          onClick={() => addToCart(product)}
+          className={`mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold text-white transition ${added ? "bg-emerald-600 hover:bg-emerald-700" : "bg-brand-700 hover:bg-brand-800"}`}
+        >
+          <ShoppingCart className="size-3.5" /> {added ? "Added ✓" : "Add to Cart"}
         </button>
       </div>
     </div>

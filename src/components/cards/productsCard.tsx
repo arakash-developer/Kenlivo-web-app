@@ -10,10 +10,12 @@ import {
   FaShoppingCart,
   FaStar,
 } from "react-icons/fa";
+import { useCart } from "@/lib/cart/cartContext";
 
 export default function ProductCard({ product }: { product: ProductType }) {
   const [isFavorite, setIsFavorite] = useState(false);
-  const [added, setAdded] = useState(false);
+  const { addToCart, items } = useCart();
+  const added = items.some((i) => i.product._id === product._id);
 
   return (
     <div className="group relative w-full overflow-hidden rounded-3xl border border-brand-300/80 bg-white shadow-[0_8px_30px_rgba(185,87,112,0.06)] transition-all duration-500 hover:-translate-y-2 hover:border-brand-400 hover:shadow-[0_20px_45px_rgba(185,87,112,0.15)]">
@@ -52,7 +54,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
         {/* Quick action */}
         <button
           type="button"
-          onClick={() => setAdded((prev) => !prev)}
+          onClick={() => addToCart(product)}
           className="absolute bottom-3 right-3 z-10 flex h-10 w-10 translate-y-3 items-center justify-center rounded-full bg-white text-brand-700 opacity-0 shadow-md transition-all duration-300 hover:bg-brand-700 hover:text-white group-hover:translate-y-0 group-hover:opacity-100"
           aria-label="Quick add to cart"
           >
@@ -98,7 +100,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
 
         <button
           type="button"
-          onClick={() => setAdded((prev) => !prev)}
+          onClick={() => addToCart(product)}
           className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 active:scale-[0.97] ${
             added
               ? "bg-emerald-600 text-white shadow-md shadow-emerald-100"
