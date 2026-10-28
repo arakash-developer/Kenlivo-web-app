@@ -14,7 +14,7 @@ export default function WishlistPage() {
     <>
       <Navbar />
       <main className="min-h-screen bg-bg-page pt-36 pb-16">
-        <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-screen-2xl px-6 md:px-10">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-dark-900 sm:text-3xl">My Wishlist</h1>
