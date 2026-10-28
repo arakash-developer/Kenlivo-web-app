@@ -17,6 +17,7 @@ import { useState } from "react";
 import { ProductType } from "@/types/AllDataType";
 import OrderSummaryCard from "../cards/orderSummaryCard";
 import { useCart } from "@/lib/cart/cartContext";
+import { useWishlist } from "@/lib/wishlist/wishlistContext";
 
 const shades = [
   { name: "Bombshell", color: "#ed9b8c" },
@@ -37,7 +38,8 @@ export default function DetailsPage({
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("Description");
   const [activeImage, setActiveImage] = useState(0);
-  const [favorite, setFavorite] = useState(false);
+  const { toggleWishlist, isWishlisted } = useWishlist();
+  const favorite = productData?._id ? isWishlisted(productData._id) : false;
   const [order, setOrder] = useState(false);
   const { addToCart, items } = useCart();
   const added = productData?._id ? items.some((i) => i.product?._id === productData._id) : false;
@@ -119,7 +121,7 @@ export default function DetailsPage({
                 )}
 
                 <button
-                  onClick={() => setFavorite(!favorite)}
+                  onClick={() => productData && toggleWishlist(productData as ProductType)}
                   aria-label="Add to wishlist"
                   className="absolute right-4 top-4 rounded-full bg-white/90 p-2.5 shadow-sm transition hover:scale-105"
                 >

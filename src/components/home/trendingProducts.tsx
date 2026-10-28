@@ -5,6 +5,7 @@ import { ProductType } from "@/types/AllDataType";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { api } from "@/lib/api/axios";
 import { useCart } from "@/lib/cart/cartContext";
+import { useWishlist } from "@/lib/wishlist/wishlistContext";
 
 export default function TrendingProducts() {
   const [products, setProducts] = useState<ProductType[]>([]);
@@ -54,8 +55,9 @@ export default function TrendingProducts() {
 }
 
 function TrendingCard({ product }: { product: ProductType }) {
-  const [wished, setWished] = useState(false);
   const { addToCart, items } = useCart();
+  const { toggleWishlist, isWishlisted } = useWishlist();
+  const wished = isWishlisted(product._id);
   const added = items.some((i) => i.product._id === product._id);
   const img = product.images?.[0] || product.imageUrl;
   const price = product.finalPrice ?? product.price ?? 0;
@@ -83,7 +85,7 @@ function TrendingCard({ product }: { product: ProductType }) {
           </span>
         ) : null}
         <button
-          onClick={(e) => { e.preventDefault(); setWished((w) => !w); }}
+          onClick={(e) => { e.preventDefault(); toggleWishlist(product); }}
           className="absolute right-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-white shadow-sm"
         >
           <Heart className={`size-4 ${wished ? "fill-brand-700 text-brand-700" : "text-muted-400"}`} />

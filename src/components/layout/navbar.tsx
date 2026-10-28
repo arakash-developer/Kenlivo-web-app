@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Heart, LogIn, Search, ShoppingBag, Truck, User, ShieldCheck } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useCart } from "@/lib/cart/cartContext";
+import { useWishlist } from "@/lib/wishlist/wishlistContext";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -24,6 +25,7 @@ export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const { totalItems } = useCart();
+  const { totalItems: wishlistCount } = useWishlist();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -91,8 +93,13 @@ export function Navbar() {
                   <LogIn className="size-5" />
                 </Link>
               )}
-              <Link href="/wishlist" aria-label="Wishlist" className="grid size-9 place-items-center rounded-full text-dark-900 hover:bg-brand-700/10 hover:text-brand-700">
+              <Link href="/wishlist" aria-label="Wishlist" className="relative grid size-9 place-items-center rounded-full text-dark-900 hover:bg-brand-700/10 hover:text-brand-700">
                 <Heart className="size-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-brand-cta text-[9px] font-bold leading-none text-white">
+                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                  </span>
+                )}
               </Link>
               <Link href="/cart" aria-label="Cart" className="relative grid size-9 place-items-center rounded-full text-dark-900 hover:bg-brand-700/10 hover:text-brand-700">
                 <ShoppingBag className="size-5" />

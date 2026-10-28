@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Agentation } from "agentation";
 import { CartProvider } from "@/lib/cart/cartContext";
+import { WishlistProvider } from "@/lib/wishlist/wishlistContext";
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   // One client per browser session, created lazily so it is never shared
@@ -25,6 +26,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={client}>
       <CartProvider>
+        <WishlistProvider>
         {children}
         {process.env.NODE_ENV === "development" ? (
           <>
@@ -32,6 +34,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             <Agentation />
           </>
         ) : null}
+        </WishlistProvider>
       </CartProvider>
     </QueryClientProvider>
   );

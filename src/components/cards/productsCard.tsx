@@ -2,7 +2,6 @@
 
 import { ProductType } from "@/types/AllDataType";
 import Link from "next/link";
-import { useState } from "react";
 import {
   FaArrowRight,
   FaHeart,
@@ -11,10 +10,12 @@ import {
   FaStar,
 } from "react-icons/fa";
 import { useCart } from "@/lib/cart/cartContext";
+import { useWishlist } from "@/lib/wishlist/wishlistContext";
 
 export default function ProductCard({ product }: { product: ProductType }) {
-  const [isFavorite, setIsFavorite] = useState(false);
   const { addToCart, items } = useCart();
+  const { toggleWishlist, isWishlisted } = useWishlist();
+  const isFavorite = isWishlisted(product._id);
   const added = items.some((i) => i.product._id === product._id);
 
   return (
@@ -32,7 +33,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
         {/* Wishlist */}
         <button
           type="button"
-          onClick={() => setIsFavorite((prev) => !prev)}
+          onClick={() => toggleWishlist(product)}
           aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
           aria-pressed={isFavorite}
           className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-muted-400 shadow-sm backdrop-blur-md transition-all duration-300 hover:scale-110 hover:text-brand-700 active:scale-95"
