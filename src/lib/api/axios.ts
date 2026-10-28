@@ -6,7 +6,7 @@ import axios, {
 import { tokenStore } from "./token-store";
 
 const baseURL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4070/api/v1";
+  process.env.NEXT_PUBLIC_API_URL ?? "/api/v1";
 
 /** Shared axios instance for the Kenlivo API. */
 export const api = axios.create({

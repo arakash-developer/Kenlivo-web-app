@@ -39,12 +39,8 @@ export default function LoginForm({
     login.mutate(
       { email, password },
       {
-        onSuccess: (user) => {
-          if (user.role === "admin") {
-            router.push("/admin");
-          } else {
-            router.push("/");
-          }
+        onSuccess: () => {
+          router.push("/");
         },
         onError: (err: unknown) => {
           const msg =

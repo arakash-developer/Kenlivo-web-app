@@ -46,7 +46,7 @@ export function Navbar() {
 
       {/* Main navbar */}
       <div className={`border-b bg-bg-page transition-shadow duration-300 ${scrolled ? "shadow-md border-brand-300" : "border-transparent"}`}>
-        <div className="mx-auto max-w-screen-xl px-4 md:px-8">
+        <div className="mx-auto max-w-screen-2xl px-6 md:px-10">
           <div className="flex h-16 items-center gap-4 md:h-[70px] md:gap-6">
             {/* Logo */}
             <Link href="/" className="flex shrink-0 items-center gap-2.5">

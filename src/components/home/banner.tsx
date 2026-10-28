@@ -29,7 +29,7 @@ export function Banner() {
         />
       </div>
 
-      <div className="relative mx-auto flex min-h-[calc(100svh-7.75rem)] max-w-screen-2xl flex-col justify-center gap-12 px-6 py-16 md:px-10 lg:flex-row lg:items-center lg:justify-start lg:gap-16 lg:py-20 lg:pr-10 lg:pl-24">
+      <div className="relative mx-auto flex min-h-[calc(100svh-7.75rem)] max-w-screen-2xl flex-col justify-center gap-12 px-6 py-16 md:px-10 lg:flex-row lg:items-center lg:justify-start lg:gap-16 lg:py-20">
         <div className="lg:w-1/2 lg:max-w-xl">
           <p className="text-sm font-bold tracking-[0.14em] text-brand-600 uppercase">
             Your beauty, our passion

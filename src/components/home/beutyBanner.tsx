@@ -29,7 +29,7 @@ const stats = [
 
 export default function BeautyBanner() {
   return (
-    <section className="mx-auto w-full max-w-screen-xl px-6 py-10 md:px-8 md:py-14">
+    <section className="mx-auto w-full max-w-screen-2xl px-6 py-10 md:px-10 md:py-14">
       <div className="grid overflow-hidden rounded-2xl border border-brand-300 bg-bg-card shadow-sm md:grid-cols-[1.65fr_1fr]">
         {/* Promotional Banner */}
         <div className="relative flex min-h-[260px] items-center overflow-hidden bg-gradient-to-r from-brand-200 via-brand-50 to-brand-100 px-6 py-8 sm:px-10 md:min-h-[280px]">

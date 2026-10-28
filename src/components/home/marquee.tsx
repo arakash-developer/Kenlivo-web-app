@@ -10,7 +10,7 @@ const features = [
 export default function MarqueePage() {
   return (
     <div className="border-y border-brand-300 bg-white">
-      <div className="mx-auto max-w-screen-xl px-6 md:px-8">
+      <div className="mx-auto max-w-screen-2xl px-6 md:px-10">
         <div className="grid grid-cols-2 divide-x divide-brand-300 md:grid-cols-4">
           {features.map(({ Icon, title, sub }) => (
             <div key={title} className="flex items-center gap-3 px-4 py-4 md:px-6 md:py-5">

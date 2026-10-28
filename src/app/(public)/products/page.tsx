@@ -315,7 +315,7 @@ function ProductsPageInner() {
             className="object-cover object-center opacity-30 mix-blend-multiply"
           />
         )}
-        <div className="relative mx-auto max-w-screen-xl px-6 py-12 md:px-10 md:py-16">
+        <div className="relative mx-auto max-w-screen-2xl px-6 py-12 md:px-10 md:py-16">
           <nav className="mb-3 flex items-center gap-1.5 text-xs text-[#987b7e]">
             <Link href="/" className="hover:text-[#c96778]">Home</Link>
             <span>/</span>
@@ -333,7 +333,7 @@ function ProductsPageInner() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-screen-xl px-4 py-8 md:px-8 lg:px-10">
+      <div className="mx-auto max-w-screen-2xl px-6 py-8 md:px-10">
         <div className="flex gap-8">
           {/* Desktop Sidebar */}
           <div className="hidden w-56 shrink-0 lg:block">
