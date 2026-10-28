@@ -51,7 +51,7 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-[#f0dde0] bg-white shadow-sm transition-shadow hover:shadow-md">
-      <Link href={`/products/${product._id}`} className="relative block aspect-4/5 overflow-hidden bg-[#fdf5f5]">
+      <Link href={`/products/${product._id}`} className="relative block aspect-square overflow-hidden bg-[#fdf5f5]">
         {img ? (
           <Image
             src={img}
@@ -402,7 +402,7 @@ function ProductsPageInner() {
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
                 {[...Array(12)].map((_, i) => (
                   <div key={i} className="overflow-hidden rounded-2xl border border-[#f0dde0] bg-white">
-                    <div className="aspect-4/5 animate-pulse bg-brand-100" />
+                    <div className="aspect-square animate-pulse bg-brand-100" />
                     <div className="space-y-2 p-3">
                       <div className="h-3 w-4/5 animate-pulse rounded bg-[#f4dedb]" />
                       <div className="h-3 w-3/5 animate-pulse rounded bg-[#f4dedb]" />
