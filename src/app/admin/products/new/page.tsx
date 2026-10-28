@@ -65,7 +65,7 @@ export default function NewProductPage() {
             <label className="mb-1.5 block text-sm font-medium text-[#65454b]">Category *</label>
             <select className={inputClass} value={form.category} onChange={(e) => set("category", e.target.value)} required>
               <option value="">Select category</option>
-              {cats?.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+              {cats?.items?.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
             </select>
           </div>
           <div>

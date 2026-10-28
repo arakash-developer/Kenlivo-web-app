@@ -161,7 +161,7 @@ export default function SignUpForm({
 
                   <Button
                     type="submit"
-                    isLoading={register.isPending}
+                    disabled={register.isPending}
                     className="h-12 w-full rounded-xl bg-[#c96778] text-sm font-semibold text-white shadow-md shadow-[#c96778]/20 transition-all hover:bg-[#ad5064] hover:shadow-lg"
                   >
                     {!register.isPending && <ArrowRight className="mr-2 size-4" />}
