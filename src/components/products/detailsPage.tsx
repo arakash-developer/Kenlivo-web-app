@@ -31,7 +31,7 @@ const tabs = ["Description", "Reviews"];
 export default function DetailsPage({
   productData,
 }: {
-  productData: ProductType;
+  productData: ProductType | null;
 }) {
   const [selectedShade, setSelectedShade] = useState(0);
   const [quantity, setQuantity] = useState(1);

@@ -3,6 +3,7 @@ import DetailsPage from "@/components/products/detailsPage";
 import { Navbar } from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { getDb, toId } from "@/lib/v1/db";
+import { ProductType } from "@/types/AllDataType";
 
 export default async function ProductDetailsPage({
   params,
@@ -21,7 +22,7 @@ export default async function ProductDetailsPage({
         { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
         { $addFields: { _id: { $toString: "$_id" }, "category._id": { $toString: "$category._id" } } },
       ]).toArray();
-      data = product ?? null;
+      data = (product ?? null) as ProductType | null;
     }
   } catch {
     // data stays null
