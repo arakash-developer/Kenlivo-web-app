@@ -162,6 +162,10 @@ export default function DetailsPage({
               {productData?.name}
             </h1>
 
+            {productData?.volume ? (
+              <p className="mt-1 text-sm text-muted-500">{productData.volume} mL</p>
+            ) : null}
+
             {/* Ratings */}
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
               <div className="flex items-center gap-0.5 text-amber-500">
@@ -191,7 +195,7 @@ export default function DetailsPage({
             </div>
 
             <p className="mt-4 max-w-lg text-sm leading-6 text-muted-500">
-              {productData?.producttagline}
+              {productData?.description}
             </p>
 
             {/* Shade selector */}

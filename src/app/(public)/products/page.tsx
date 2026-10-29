@@ -92,11 +92,11 @@ function ProductCard({ product }: { product: Product }) {
 
         <div className="flex items-baseline gap-2">
           <span className="text-base font-bold text-[#c96778]">
-            ৳ {(product.finalPrice ?? product.price ?? 0).toLocaleString()}
+            ৳ {Math.round(product.finalPrice ?? product.price ?? 0).toLocaleString()}
           </span>
           {hasDiscount && (
             <span className="text-xs text-[#b3a3a5] line-through">
-              ৳ {(product.price ?? 0).toLocaleString()}
+              ৳ {Math.round(product.price ?? 0).toLocaleString()}
             </span>
           )}
         </div>

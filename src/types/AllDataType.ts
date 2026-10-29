@@ -6,6 +6,7 @@ export interface ProductType {
   finalPrice?: number
   discountPercentage?: number
   discount?: string | number
+  volume?: number
   tagline?: string
   producttagline?: string
   images?: string[]

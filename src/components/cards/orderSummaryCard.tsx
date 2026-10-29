@@ -178,8 +178,11 @@ export default function OrderSummaryCard({
                             />
                             <p className="text-[#382A2B]">
                               {productData?.name}
+                              {productData?.volume ? (
+                                <span className="ml-1 text-xs text-[#A99A9A]">{productData.volume} mL</span>
+                              ) : null}
                               <br />
-                              {productData?.category}
+                              <span className="text-xs text-[#A99A9A]">{productData?.category}</span>
                             </p>
                           </div>
 
