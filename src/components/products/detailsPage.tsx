@@ -188,10 +188,6 @@ export default function DetailsPage({
               ) : null}
             </div>
 
-            <p className="mt-4 max-w-lg text-sm leading-6 text-muted-500">
-              {productData?.description}
-            </p>
-
             {/* Shade selector */}
             <div className="mt-6">
               <div className="flex items-center gap-2 text-sm">
