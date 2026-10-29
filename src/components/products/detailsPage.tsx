@@ -156,10 +156,6 @@ export default function DetailsPage({
               {productData?.name}
             </h1>
 
-            {productData?.volume ? (
-              <p className="mt-1 text-sm text-muted-500">{productData.volume} mL</p>
-            ) : null}
-
             {/* Ratings */}
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
               <div className="flex items-center gap-0.5 text-amber-500">
@@ -188,12 +184,17 @@ export default function DetailsPage({
               ) : null}
             </div>
 
-            {/* Shade selector */}
-            <div className="mt-6">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-semibold">Color:</span>
+            {/* Volume */}
+            {productData?.volume ? (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-semibold">Size:</span>
+                  <span className="rounded-md border border-brand-300 bg-bg-blush px-3 py-1 text-sm font-medium text-brand-deep">
+                    {productData.volume} mL
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : null}
 
             {/* Quantity */}
             <div className="mt-6">
