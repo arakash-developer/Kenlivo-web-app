@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Heart, LogIn, Search, ShoppingBag, Truck, User, ShieldCheck } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
@@ -54,13 +55,8 @@ export function Navbar() {
           <div className="flex h-16 items-center gap-4 md:h-[70px] md:gap-6">
             {/* Logo */}
             <Link href="/" className="flex shrink-0 items-center gap-2.5">
-              <span className="grid size-9 place-items-center rounded-full bg-brand-700 text-white md:size-10">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-                  <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                  <line x1="9" y1="9" x2="9.01" y2="9"/>
-                  <line x1="15" y1="9" x2="15.01" y2="9"/>
-                </svg>
+              <span className="grid size-9 place-items-center md:size-10">
+                <Image src="/logo-icon.svg" alt="Kenlivo" width={40} height={40} priority />
               </span>
               <span className="flex flex-col leading-none">
                 <span className="font-heading text-xl font-bold text-dark-900 md:text-2xl">Kenlivo</span>

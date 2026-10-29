@@ -188,7 +188,7 @@ export default function DetailsPage({
             {productData?.volume ? (
               <div className="mt-6">
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="font-semibold">Size:</span>
+                  <span className="font-semibold">Volume:</span>
                   <span className="rounded-md border border-brand-300 bg-bg-blush px-3 py-1 text-sm font-medium text-brand-deep">
                     {productData.volume} mL
                   </span>

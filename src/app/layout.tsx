@@ -25,6 +25,11 @@ const greatVibes = Great_Vibes({
 export const metadata: Metadata = {
   title: "Kenlivo",
   description: "Kenlivo - Beauty Meets Lifestyle",
+  icons: {
+    icon: "/logo-icon.svg",
+    shortcut: "/logo-icon.svg",
+    apple: "/logo-icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
