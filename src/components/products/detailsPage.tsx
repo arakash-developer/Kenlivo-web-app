@@ -11,8 +11,6 @@ import {
   Truck,
 } from "lucide-react";
 import Link from "next/link";
-import { EditButton } from "../cards/productsEditButtonCard";
-import DeleteButton from "../cards/productsDeleteButtonCard";
 import { useState } from "react";
 import { ProductType } from "@/types/AllDataType";
 import OrderSummaryCard from "../cards/orderSummaryCard";
@@ -62,7 +60,7 @@ export default function DetailsPage({
     <main className="min-h-screen pt-35.5 text-dark-900">
       <div className="mx-auto max-w-screen-2xl px-4 py-5 sm:px-7 lg:px-10">
         {/* Breadcrumb */}
-        <div className="flex items-center py-4 justify-between">
+        <div className="flex items-center py-4">
           <nav className="flex flex-wrap items-center gap-2 text-xs text-muted-500">
             <Link href="/" className="transition hover:text-brand-deep">
               Home
@@ -77,10 +75,6 @@ export default function DetailsPage({
             <ChevronRight size={13} />
             <span className="text-brand-deep">{productData?.name}</span>
           </nav>
-          <div className="flex items-center gap-3">
-            <EditButton product={(productData ?? {}) as ProductType} />
-            <DeleteButton product={(productData ?? {}) as ProductType} />
-          </div>
         </div>
 
         {/* Product section */}
