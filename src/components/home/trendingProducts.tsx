@@ -102,8 +102,8 @@ function TrendingCard({ product }: { product: ProductType }) {
           <span className="ml-1 text-[11px] text-muted-500">({product.numReviews ?? 0})</span>
         </div>
         <div className="mt-1.5 flex items-center gap-2">
-          <span className="text-base font-bold text-brand-700">৳{Number(price).toLocaleString()}</span>
-          {originalPrice && <span className="text-xs text-muted-400 line-through">৳{Number(originalPrice).toLocaleString()}</span>}
+          <span className="text-base font-bold text-brand-700">৳{Math.round(Number(price)).toLocaleString()}</span>
+          {originalPrice && <span className="text-xs text-muted-400 line-through">৳{Math.round(Number(originalPrice)).toLocaleString()}</span>}
         </div>
         <button
           onClick={() => addToCart(product)}

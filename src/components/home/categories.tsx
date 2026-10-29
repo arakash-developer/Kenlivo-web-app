@@ -46,11 +46,11 @@ export function Categories() {
           </div>
         ) : (
           <Carousel opts={{ align: "start" }}>
-            <CarouselContent className="-ml-6">
+            <CarouselContent className="-ml-8">
               {active.map((cat) => (
                 <CarouselItem
                   key={cat._id}
-                  className="basis-1/2 pl-6 sm:basis-1/3 lg:basis-1/4 xl:basis-1/6"
+                  className="basis-1/2 pl-8 sm:basis-1/3 lg:basis-1/4 xl:basis-1/6"
                 >
                   <Link
                     href={`/products?category=${cat._id}`}

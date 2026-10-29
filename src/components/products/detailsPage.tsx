@@ -176,8 +176,18 @@ export default function DetailsPage({
             {/* Price */}
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <span className="text-2xl font-semibold text-brand-deep">
-                ৳ {productData?.price}
+                ৳ {Math.round(Number(productData?.finalPrice ?? productData?.price ?? 0)).toLocaleString()}
               </span>
+              {productData?.finalPrice && productData.finalPrice < (productData?.price ?? Infinity) && (
+                <span className="text-base text-muted-400 line-through">
+                  ৳ {Math.round(Number(productData.price)).toLocaleString()}
+                </span>
+              )}
+              {productData?.discountPercentage && productData.discountPercentage > 0 ? (
+                <span className="rounded-md bg-brand-700 px-2 py-0.5 text-xs font-bold text-white">
+                  -{productData.discountPercentage}%
+                </span>
+              ) : null}
             </div>
 
             <p className="mt-4 max-w-lg text-sm leading-6 text-muted-500">
