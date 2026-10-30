@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -9,12 +9,21 @@ import { authClient } from "@/lib/auth-client";
 import { useCart } from "@/lib/cart/cartContext";
 import { useWishlist } from "@/lib/wishlist/wishlistContext";
 import { useCollections } from "@/hooks/useCollections";
+import { productsApi } from "@/lib/api/products";
+import { getApiErrorMessage } from "@/lib/api/axios";
+import type { Product } from "@/lib/api/types";
 
 export function Navbar() {
   const { data: session } = authClient.useSession();
   const user = session?.user;
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const searchFormRef = useRef<HTMLFormElement>(null);
   const { totalItems } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
   const { data: collections } = useCollections();
@@ -31,6 +40,50 @@ export function Navbar() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const query = search.trim();
+    if (query.length < 2) return;
+
+    let active = true;
+    const timeout = window.setTimeout(() => {
+      setSearchLoading(true);
+      setSearchError("");
+      productsApi
+        .list({ search: query, limit: 6 })
+        .then(({ items }) => {
+          if (active) setSearchResults(items);
+        })
+        .catch((error: unknown) => {
+          if (active) {
+            setSearchResults([]);
+            setSearchError(getApiErrorMessage(error, "Could not search products."));
+          }
+        })
+        .finally(() => {
+          if (active) setSearchLoading(false);
+        });
+    }, 250);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    function closeSearch(event: PointerEvent) {
+      if (
+        event.target instanceof Node &&
+        !searchFormRef.current?.contains(event.target)
+      ) {
+        setSearchOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", closeSearch);
+    return () => document.removeEventListener("pointerdown", closeSearch);
   }, []);
 
   return (
@@ -63,17 +116,108 @@ export function Navbar() {
             </Link>
 
             {/* Search */}
-            <form role="search" action="/products" className="relative mx-auto hidden h-10 w-full max-w-lg flex-1 items-center sm:flex md:h-11">
+            <form
+              ref={searchFormRef}
+              role="search"
+              action="/products"
+              className="relative mx-auto hidden h-10 w-full max-w-lg flex-1 items-center sm:flex md:h-11"
+            >
               <Search className="pointer-events-none absolute left-3.5 size-4 text-muted-500" aria-hidden="true" />
               <input
                 type="search"
                 name="search"
+                role="combobox"
+                value={search}
+                autoComplete="off"
+                aria-label="Search products"
+                aria-autocomplete="list"
+                aria-expanded={searchOpen && search.trim().length >= 2}
+                aria-controls="product-search-results"
+                onFocus={() => setSearchOpen(true)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSearch(value);
+                  setSearchResults([]);
+                  setSearchLoading(value.trim().length >= 2);
+                  setSearchError("");
+                  setSearchOpen(true);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") setSearchOpen(false);
+                }}
                 placeholder="Search products, brands and more..."
                 className="h-full w-full rounded-full border border-brand-400 bg-white pr-12 pl-10 text-sm text-dark-900 outline-none placeholder:text-muted-400 focus:border-brand-700/50 focus:ring-2 focus:ring-brand-700/10"
               />
               <button type="submit" className="absolute right-1.5 grid h-8 w-9 place-items-center rounded-full bg-brand-700 text-white hover:bg-brand-800">
                 <Search className="size-3.5" />
               </button>
+              {searchOpen && search.trim().length >= 2 && (
+                <div
+                  id="product-search-results"
+                  aria-live="polite"
+                  className="absolute top-full right-0 left-0 z-50 mt-2 overflow-hidden rounded-xl border border-brand-300 bg-white shadow-lg"
+                >
+                  {searchLoading ? (
+                    <p className="px-4 py-3 text-sm text-muted-500">Searching products...</p>
+                  ) : searchError ? (
+                    <p role="alert" className="px-4 py-3 text-sm text-red-600">
+                      {searchError}
+                    </p>
+                  ) : searchResults.length > 0 ? (
+                    <ul aria-label="Product search results" className="max-h-96 overflow-y-auto py-1">
+                      {searchResults.map((product) => (
+                        <li key={product._id}>
+                          <Link
+                            href={`/products/${product._id}`}
+                            onClick={() => setSearchOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-brand-50"
+                          >
+                            {product.images?.[0] ? (
+                              <Image
+                                src={product.images[0]}
+                                alt=""
+                                width={44}
+                                height={44}
+                                className="size-11 shrink-0 rounded-lg object-cover"
+                              />
+                            ) : (
+                              <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700">
+                                <Search className="size-4" aria-hidden="true" />
+                              </span>
+                            )}
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-sm font-medium text-dark-900">
+                                {product.name}
+                              </span>
+                              <span className="mt-0.5 flex items-center gap-2 text-sm">
+                                <span className="font-semibold text-brand-700">
+                                  ৳{(product.finalPrice ?? product.price).toLocaleString()}
+                                </span>
+                                {product.discountPercentage > 0 && (
+                                  <del className="text-xs text-muted-400">
+                                    ৳{product.price.toLocaleString()}
+                                  </del>
+                                )}
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="px-4 py-3 text-sm text-muted-500">
+                      No products found.
+                    </p>
+                  )}
+                  <Link
+                    href={`/products?search=${encodeURIComponent(search.trim())}`}
+                    onClick={() => setSearchOpen(false)}
+                    className="block border-t border-brand-200 px-4 py-3 text-center text-sm font-semibold text-brand-700 hover:bg-brand-50"
+                  >
+                    View all search results
+                  </Link>
+                </div>
+              )}
             </form>
 
             {/* Icons */}
