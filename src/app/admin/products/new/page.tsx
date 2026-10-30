@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateProduct, useCategories } from "@/hooks/useProducts";
+import { useCollections } from "@/hooks/useCollections";
 import { getApiErrorMessage } from "@/lib/api/axios";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import Link from "next/link";
@@ -10,11 +11,12 @@ import Link from "next/link";
 const inputClass =
   "h-11 w-full rounded-xl border border-[#ead8d7] bg-[#fffdfc] px-3 text-sm text-[#492a30] placeholder:text-[#c2aaab] outline-none focus:border-[#c66f7d] focus:ring-2 focus:ring-[#f3d5d8]";
 
-const empty = { name: "", category: "", price: "", discountPercentage: "", stock: "", tagline: "", images: "", description: "" };
+const empty = { name: "", category: "", collection: "", price: "", discountPercentage: "", stock: "", tagline: "", images: "", description: "" };
 
 export default function NewProductPage() {
   const router = useRouter();
   const { data: cats } = useCategories();
+  const { data: collections } = useCollections();
   const create = useCreateProduct();
   const [form, setForm] = useState(empty);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +37,7 @@ export default function NewProductPage() {
         discountPercentage: form.discountPercentage ? Number(form.discountPercentage) : undefined,
         stock: form.stock ? Number(form.stock) : undefined,
         category: form.category,
+        collection: form.collection,
         images: imagePreviews,
       });
       router.push("/admin/products");
@@ -69,9 +72,17 @@ export default function NewProductPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-[#65454b]">Price (TK) *</label>
-            <input type="number" min="0" step="0.01" className={inputClass} value={form.price} onChange={(e) => set("price", e.target.value)} placeholder="e.g. 1299" required />
+            <label className="mb-1.5 block text-sm font-medium text-[#65454b]">Collection *</label>
+            <select className={inputClass} value={form.collection} onChange={(e) => set("collection", e.target.value)} required>
+              <option value="">Select collection</option>
+              {collections?.map((collection) => <option key={collection._id} value={collection._id}>{collection.name}</option>)}
+            </select>
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[#65454b]">Price (TK) *</label>
+          <input type="number" min="0" step="0.01" className={inputClass} value={form.price} onChange={(e) => set("price", e.target.value)} placeholder="e.g. 1299" required />
         </div>
 
         <div className="grid grid-cols-2 gap-4">

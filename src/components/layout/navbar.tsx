@@ -8,17 +8,7 @@ import { Heart, LogIn, Search, ShoppingBag, Truck, User, ShieldCheck } from "luc
 import { authClient } from "@/lib/auth-client";
 import { useCart } from "@/lib/cart/cartContext";
 import { useWishlist } from "@/lib/wishlist/wishlistContext";
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/category/makeup", label: "Makeup" },
-  { href: "/category/skincare", label: "Skincare" },
-  { href: "/category/haircare", label: "Haircare" },
-  { href: "/category/fragrance", label: "Fragrance" },
-  { href: "/category/tools-accessories", label: "Tools & Accessories" },
-  { href: "/brands", label: "Brands" },
-  { href: "/offers", label: "Offers" },
-];
+import { useCollections } from "@/hooks/useCollections";
 
 export function Navbar() {
   const { data: session } = authClient.useSession();
@@ -27,6 +17,14 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { totalItems } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
+  const { data: collections } = useCollections();
+  const navLinks = [
+    { href: "/", label: "Home" },
+    ...(collections ?? []).map((collection) => ({
+      href: `/collections/${encodeURIComponent(collection.slug || collection.name.toLowerCase().replace(/\s+/g, "-"))}`,
+      label: collection.name,
+    })),
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);

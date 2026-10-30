@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useProduct, useUpdateProduct, useCategories } from "@/hooks/useProducts";
+import { useCollections } from "@/hooks/useCollections";
 import { getApiErrorMessage } from "@/lib/api/axios";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import Link from "next/link";
@@ -15,18 +16,26 @@ export default function EditProductPage() {
   const router = useRouter();
   const { data: product, isLoading } = useProduct(params.id);
   const { data: cats } = useCategories();
+  const { data: collections } = useCollections();
   const update = useUpdateProduct();
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
-    name: "", category: "", price: "", discountPercentage: "", stock: "", tagline: "", images: "", description: "", isActive: true,
+    name: "", category: "", collection: "", price: "", discountPercentage: "", stock: "", tagline: "", images: "", description: "", isActive: true,
   });
 
   useEffect(() => {
     if (!product) return;
     const catId = typeof product.category === "string" ? product.category : product.category?._id ?? "";
+    const collectionId =
+      typeof product.collection === "string"
+        ? product.collection
+        : product.collection?._id ?? "";
+    // Populate the form after the async product request completes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm({
       name: product.name,
       category: catId,
+      collection: collectionId,
       price: String(product.price),
       discountPercentage: String(product.discountPercentage),
       stock: String(product.stock),
@@ -56,6 +65,7 @@ export default function EditProductPage() {
           discountPercentage: Number(form.discountPercentage),
           stock: Number(form.stock),
           category: form.category,
+          collection: form.collection,
           images: imagePreviews,
           isActive: form.isActive,
         },
@@ -96,9 +106,17 @@ export default function EditProductPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-[#65454b]">Price (TK) *</label>
-            <input type="number" min="0" step="0.01" className={inputClass} value={form.price} onChange={(e) => set("price", e.target.value)} required />
+            <label className="mb-1.5 block text-sm font-medium text-[#65454b]">Collection *</label>
+            <select className={inputClass} value={form.collection} onChange={(e) => set("collection", e.target.value)} required>
+              <option value="">Select collection</option>
+              {collections?.map((collection) => <option key={collection._id} value={collection._id}>{collection.name}</option>)}
+            </select>
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[#65454b]">Price (TK) *</label>
+          <input type="number" min="0" step="0.01" className={inputClass} value={form.price} onChange={(e) => set("price", e.target.value)} required />
         </div>
 
         <div className="grid grid-cols-2 gap-4">

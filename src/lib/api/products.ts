@@ -8,6 +8,7 @@ export interface ProductInput {
   price: number;
   discountPercentage?: number;
   category: string;
+  collection: string;
   images?: string[];
   stock?: number;
   isActive?: boolean;

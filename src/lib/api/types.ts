@@ -29,6 +29,14 @@ export interface Category {
   isActive: boolean;
 }
 
+export interface Collection {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  isActive: boolean;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -39,6 +47,7 @@ export interface Product {
   discountPercentage: number;
   finalPrice: number;
   category: Category | string;
+  collection?: Collection | string;
   images: string[];
   stock: number;
   rating: number;
@@ -53,6 +62,7 @@ export interface ProductListQuery {
   limit?: number;
   search?: string;
   category?: string;
+  collection?: string;
   sort?: string;
 }
 

@@ -5,10 +5,11 @@ import { categoriesApi, productsApi, type CategoryInput, type CategoryListQuery,
 import { queryKeys } from "@/lib/api/query-keys";
 import type { ProductListQuery } from "@/lib/api/types";
 
-export function useProducts(query: ProductListQuery = {}) {
+export function useProducts(query: ProductListQuery = {}, enabled = true) {
   return useQuery({
     queryKey: queryKeys.products.list(query),
     queryFn: () => productsApi.list(query),
+    enabled,
   });
 }
 

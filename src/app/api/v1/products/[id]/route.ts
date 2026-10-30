@@ -12,8 +12,10 @@ export async function GET(_req: Request, { params }: Ctx) {
   const [product] = await db.collection("products").aggregate([
     { $match: { _id: oid } },
     { $lookup: { from: "categories", localField: "category", foreignField: "_id", as: "category" } },
+    { $lookup: { from: "collections", localField: "collection", foreignField: "_id", as: "collection" } },
     { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
-    { $addFields: { _id: { $toString: "$_id" }, "category._id": { $toString: "$category._id" } } },
+    { $unwind: { path: "$collection", preserveNullAndEmptyArrays: true } },
+    { $addFields: { _id: { $toString: "$_id" }, "category._id": { $toString: "$category._id" }, "collection._id": { $toString: "$collection._id" } } },
   ]).toArray();
 
   if (!product) return notFound("Product not found");
@@ -29,20 +31,27 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (!oid) return err("Invalid id");
 
   const body = await req.json().catch(() => ({}));
-  const allowed = ["name", "description", "tagline", "price", "discountPercentage", "category", "images", "stock", "isActive"];
+  const allowed = ["name", "description", "tagline", "price", "discountPercentage", "category", "collection", "images", "stock", "isActive"];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const update: Record<string, any> = { updatedAt: new Date() };
 
   for (const key of allowed) {
     if (key in body) {
-      if (key === "category") {
-        const cid = toId(body[key]);
-        if (!cid) return err("Invalid category id");
-        update[key] = cid;
+      if (key === "category" || key === "collection") {
+        const referenceId = toId(body[key]);
+        if (!referenceId) return err(`Invalid ${key} id`);
+        update[key] = referenceId;
       } else {
         update[key] = body[key];
       }
     }
+  }
+
+  if ("collection" in update) {
+    const collectionExists = await (await getDb())
+      .collection("collections")
+      .findOne({ _id: update.collection });
+    if (!collectionExists) return err("Collection not found", 404);
   }
 
   if ("price" in update || "discountPercentage" in update) {

@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, Heart, Star, ChevronDown, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useProducts, useCategories } from "@/hooks/useProducts";
+import { useCollections } from "@/hooks/useCollections";
 import type { Product } from "@/lib/api/types";
 import { useCart } from "@/lib/cart/cartContext";
 import { useWishlist } from "@/lib/wishlist/wishlistContext";
@@ -251,7 +252,13 @@ function FilterSidebar({
   );
 }
 
-function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
+function ProductsPageInner({
+  categorySlug,
+  collectionSlug,
+}: {
+  categorySlug?: string;
+  collectionSlug?: string;
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -259,16 +266,12 @@ function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
   const pageParam = Number(searchParams.get("page") ?? "1");
 
   const [sort, setSort] = useState("-rating");
-  const [selectedCategoryState, setSelectedCategoryState] = useState(categoryParam);
   const [selectedPrice, setSelectedPrice] = useState(-1);
   const [selectedRating, setSelectedRating] = useState(0);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  useEffect(() => {
-    if (!categorySlug) setSelectedCategoryState(categoryParam);
-  }, [categoryParam, categorySlug]);
-
   const { data: catData, isLoading: isCategoriesLoading } = useCategories();
+  const { data: collections, isLoading: isCollectionsLoading } = useCollections();
   const activeCategories = catData?.items?.filter((c) => c.isActive) ?? [];
   const routeCategory = categorySlug
     ? activeCategories.find(
@@ -278,13 +281,23 @@ function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
           category._id === categorySlug
       )
     : undefined;
-  const selectedCategory = categorySlug ? routeCategory?._id ?? "" : selectedCategoryState;
+  const routeCollection = collectionSlug
+    ? collections?.find(
+        (collection) =>
+          collection.slug.toLowerCase() === collectionSlug.toLowerCase() ||
+          collection.name.toLowerCase().replace(/\s+/g, "-") === collectionSlug.toLowerCase()
+      )
+    : undefined;
+  const selectedCategory = categorySlug ? routeCategory?._id ?? "" : categoryParam;
 
   useEffect(() => {
     if (categorySlug && catData && !routeCategory) {
       router.replace("/products");
     }
-  }, [categorySlug, catData, routeCategory, router]);
+    if (collectionSlug && collections && !routeCollection) {
+      router.replace("/products");
+    }
+  }, [categorySlug, catData, routeCategory, collectionSlug, collections, routeCollection, router]);
 
   const heroCat = categorySlug
     ? routeCategory
@@ -295,11 +308,17 @@ function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
     limit: 12,
     sort,
     ...(selectedCategory ? { category: selectedCategory } : {}),
+    ...(routeCollection ? { collection: routeCollection._id } : {}),
   };
 
-  const { data, isLoading } = useProducts(queryParams);
+  const { data, isLoading } = useProducts(
+    queryParams,
+    !collectionSlug || Boolean(routeCollection)
+  );
   const isPageLoading =
-    isLoading || (Boolean(categorySlug) && (isCategoriesLoading || !routeCategory));
+    isLoading ||
+    (Boolean(categorySlug) && (isCategoriesLoading || !routeCategory)) ||
+    (Boolean(collectionSlug) && (isCollectionsLoading || !routeCollection));
   const products = (data?.items ?? []).filter((p) => {
     if (selectedRating > 0 && p.rating < selectedRating) return false;
     if (selectedPrice >= 0) {
@@ -328,7 +347,6 @@ function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
       return;
     }
 
-    setSelectedCategoryState(id);
     const params = new URLSearchParams(searchParams.toString());
     if (id) params.set("category", id);
     else params.delete("category");
@@ -337,13 +355,10 @@ function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
   };
 
   const clearFilters = () => {
-    setSelectedCategoryState("");
     setSelectedPrice(-1);
     setSelectedRating(0);
-    router.push("/products");
+    router.push(collectionSlug ? `/collections/${encodeURIComponent(collectionSlug)}` : "/products");
   };
-
-  const totalFiltered = products.length;
 
   return (
     <div className="min-h-screen bg-[#fdf8f7]">
@@ -361,15 +376,17 @@ function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
           <nav className="mb-3 flex items-center gap-1.5 text-xs text-[#987b7e]">
             <Link href="/" className="hover:text-[#c96778]">Home</Link>
             <span>/</span>
-            <span className="text-[#492a30]">{heroCat?.name ?? "Products"}</span>
+            <span className="text-[#492a30]">{routeCollection?.name ?? heroCat?.name ?? "Products"}</span>
           </nav>
           <h1 className="font-heading text-4xl font-bold text-[#2B2622] md:text-5xl">
-            {heroCat?.name ?? "All Products"}
+            {routeCollection?.name ?? heroCat?.name ?? "All Products"}
           </h1>
-          {heroCat?.description && (
-            <p className="mt-2 max-w-xl text-sm text-[#65454b] md:text-base">{heroCat.description}</p>
+          {(routeCollection?.description || heroCat?.description) && (
+            <p className="mt-2 max-w-xl text-sm text-[#65454b] md:text-base">
+              {routeCollection?.description || heroCat?.description}
+            </p>
           )}
-          {!heroCat && (
+          {!heroCat && !routeCollection && (
             <p className="mt-2 text-sm text-[#65454b]">Discover our full collection</p>
           )}
         </div>
@@ -402,7 +419,7 @@ function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
                 >
                   <SlidersHorizontal className="size-4" /> Filters
                 </button>
-                {meta && (
+                {meta && meta.total > 0 && (
                   <p className="text-sm text-[#987b7e]">
                     Showing {(pageParam - 1) * 12 + 1}–{Math.min(pageParam * 12, meta.total)} of {meta.total} products
                   </p>
@@ -526,10 +543,16 @@ function ProductsPageInner({ categorySlug }: { categorySlug?: string }) {
   );
 }
 
-export default function ProductsPage({ categorySlug }: { categorySlug?: string }) {
+export default function ProductsPage({
+  categorySlug,
+  collectionSlug,
+}: {
+  categorySlug?: string;
+  collectionSlug?: string;
+}) {
   return (
     <Suspense>
-      <ProductsPageInner categorySlug={categorySlug} />
+      <ProductsPageInner categorySlug={categorySlug} collectionSlug={collectionSlug} />
     </Suspense>
   );
 }

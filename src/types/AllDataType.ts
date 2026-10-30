@@ -29,4 +29,3 @@ export interface OrderDataType {
   imageUrl: string
   description: string
 }
-

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useProducts, useDeleteProduct, useCategories } from "@/hooks/useProducts";
+import { useCollections } from "@/hooks/useCollections";
 import { Loader2, Plus, Pencil, Trash2, Search, Package } from "lucide-react";
 import { getApiErrorMessage } from "@/lib/api/axios";
 import type { Product } from "@/lib/api/types";
@@ -12,6 +13,7 @@ export default function AdminProductsPage() {
   const [page, setPage] = useState(1);
   const { data, isLoading } = useProducts({ search: search || undefined, page, limit: 20, sort: "-createdAt" });
   const { data: cats } = useCategories();
+  const { data: collections } = useCollections();
   const deleteProduct = useDeleteProduct();
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -24,6 +26,13 @@ export default function AdminProductsPage() {
       return cats?.items?.find((c) => c._id === p.category)?.name ?? "—";
     }
     return p.category.name;
+  };
+  const collectionName = (p: Product) => {
+    if (!p.collection) return "—";
+    if (typeof p.collection === "string") {
+      return collections?.find((collection) => collection._id === p.collection)?.name ?? "—";
+    }
+    return p.collection.name;
   };
 
   const handleDelete = async (p: Product) => {
@@ -77,6 +86,7 @@ export default function AdminProductsPage() {
                 <tr className="border-b border-[#f4dedb] bg-[#fff8f6]">
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#987b7e]">Product</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#987b7e]">Category</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#987b7e]">Collection</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#987b7e]">Price</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#987b7e]">Stock</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-[#987b7e]">Status</th>
@@ -86,7 +96,7 @@ export default function AdminProductsPage() {
               <tbody className="divide-y divide-[#f4dedb]">
                 {products.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center">
+                    <td colSpan={7} className="py-12 text-center">
                       <Package className="mx-auto mb-2 size-8 text-[#c2aaab]" />
                       <p className="text-sm text-[#987b7e]">No products found.</p>
                     </td>
@@ -111,6 +121,7 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-[#65454b]">{catName(p)}</td>
+                    <td className="px-4 py-3 text-[#65454b]">{collectionName(p)}</td>
                     <td className="px-4 py-3">
                       <div>
                         <span className="font-medium text-[#492a30]">৳{p.finalPrice}</span>
