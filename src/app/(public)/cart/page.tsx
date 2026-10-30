@@ -6,7 +6,14 @@ import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag, ChevronRight } from "lucide-react";
 
 export default function CartPage() {
-  const { items, removeFromCart, updateQuantity, totalItems, totalPrice } = useCart();
+  const {
+    items,
+    removeFromCart,
+    updateQuantity,
+    clearCheckoutSelection,
+    totalItems,
+    totalPrice,
+  } = useCart();
   const deliveryFee = totalPrice >= 1000 ? 0 : 60;
   const grandTotal = totalPrice + (items.length > 0 ? deliveryFee : 0);
 
@@ -159,6 +166,7 @@ export default function CartPage() {
                   <div className="px-5 pb-5">
                     <Link
                       href="/checkout"
+                      onClick={clearCheckoutSelection}
                       className="block w-full rounded-xl bg-brand-700 py-3 text-center text-sm font-bold text-white transition hover:bg-brand-800 active:scale-[0.98]"
                     >
                       Proceed to Checkout

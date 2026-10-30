@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { isAxiosError } from "axios";
 import { ArrowLeft, CheckCircle2, ShoppingBag } from "lucide-react";
@@ -15,16 +15,113 @@ const initialAddress: ShippingAddress = {
   fullName: "",
   phone: "",
   street: "",
+  division: "",
   city: "",
   postalCode: "",
   country: "Bangladesh",
 };
 
+const districtsByDivision = {
+  Barishal: [
+    "Barguna",
+    "Barishal",
+    "Bhola",
+    "Jhalokati",
+    "Patuakhali",
+    "Pirojpur",
+  ],
+  Chattogram: [
+    "Bandarban",
+    "Brahmanbaria",
+    "Chandpur",
+    "Chattogram",
+    "Cumilla",
+    "Cox's Bazar",
+    "Feni",
+    "Khagrachhari",
+    "Lakshmipur",
+    "Noakhali",
+    "Rangamati",
+  ],
+  Dhaka: [
+    "Dhaka",
+    "Faridpur",
+    "Gazipur",
+    "Gopalganj",
+    "Kishoreganj",
+    "Madaripur",
+    "Manikganj",
+    "Munshiganj",
+    "Narayanganj",
+    "Narsingdi",
+    "Rajbari",
+    "Shariatpur",
+    "Tangail",
+  ],
+  Khulna: [
+    "Bagerhat",
+    "Chuadanga",
+    "Jashore",
+    "Jhenaidah",
+    "Khulna",
+    "Kushtia",
+    "Magura",
+    "Meherpur",
+    "Narail",
+    "Satkhira",
+  ],
+  Mymensingh: ["Jamalpur", "Mymensingh", "Netrokona", "Sherpur"],
+  Rajshahi: [
+    "Bogura",
+    "Joypurhat",
+    "Naogaon",
+    "Natore",
+    "Chapainawabganj",
+    "Pabna",
+    "Rajshahi",
+    "Sirajganj",
+  ],
+  Rangpur: [
+    "Dinajpur",
+    "Gaibandha",
+    "Kurigram",
+    "Lalmonirhat",
+    "Nilphamari",
+    "Panchagarh",
+    "Rangpur",
+    "Thakurgaon",
+  ],
+  Sylhet: ["Habiganj", "Moulvibazar", "Sunamganj", "Sylhet"],
+} as const;
+
 const inputClass =
   "mt-1.5 h-11 w-full rounded-lg border border-brand-300 bg-white px-3 text-sm text-dark-900 outline-none focus:border-brand-700 focus:ring-2 focus:ring-brand-700/10";
 
 export default function CheckoutPage() {
-  const { items, totalItems, totalPrice, clearCart } = useCart();
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-bg-page" />}>
+      <CheckoutContent />
+    </Suspense>
+  );
+}
+
+function CheckoutContent() {
+  const {
+    items,
+    checkoutProductId,
+    clearCart,
+    removeFromCart,
+    clearCheckoutSelection,
+  } = useCart();
+  const checkoutItems = checkoutProductId
+    ? items.filter(({ product }) => product._id === checkoutProductId)
+    : items;
+  const totalItems = checkoutItems.reduce((total, item) => total + item.quantity, 0);
+  const totalPrice = checkoutItems.reduce(
+    (total, { product, quantity }) =>
+      total + (product.finalPrice ?? product.price) * quantity,
+    0,
+  );
   const [address, setAddress] = useState(initialAddress);
   const [error, setError] = useState("");
   const [needsLogin, setNeedsLogin] = useState(false);
@@ -45,14 +142,16 @@ export default function CheckoutPage() {
 
     try {
       const order = await ordersApi.create({
-        items: items.map(({ product, quantity }) => ({
+        items: checkoutItems.map(({ product, quantity }) => ({
           product: product._id,
           quantity,
         })),
         shippingAddress: address,
         paymentMethod: "cash_on_delivery",
       });
-      clearCart();
+      if (checkoutProductId) removeFromCart(checkoutProductId);
+      else clearCart();
+      clearCheckoutSelection();
       setOrderId(order._id);
     } catch (requestError) {
       if (isAxiosError(requestError) && requestError.response?.status === 401) {
@@ -93,7 +192,7 @@ export default function CheckoutPage() {
                 View my orders
               </Link>
             </section>
-          ) : items.length === 0 ? (
+          ) : checkoutItems.length === 0 ? (
             <section className="flex flex-col items-center rounded-2xl border border-brand-300 bg-white py-20 text-center">
               <ShoppingBag className="size-12 text-brand-300" />
               <h1 className="mt-4 text-xl font-semibold text-dark-900">Your cart is empty</h1>
@@ -158,14 +257,48 @@ export default function CheckoutPage() {
                       />
                     </label>
                     <label className="text-sm font-medium text-dark-900">
-                      City / District
-                      <input
+                      Division
+                      <select
                         className={inputClass}
-                        autoComplete="address-level2"
                         required
+                        value={address.division}
+                        onChange={(event) => {
+                          updateAddress("division", event.target.value);
+                          updateAddress("city", "");
+                        }}
+                      >
+                        <option value="" disabled>
+                          Select your division
+                        </option>
+                        {Object.entries(districtsByDivision).map(
+                          ([division]) => (
+                            <option key={division} value={division}>
+                              {division}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </label>
+                    <label className="text-sm font-medium text-dark-900">
+                      District
+                      <select
+                        className={inputClass}
+                        required
+                        disabled={!address.division}
                         value={address.city}
                         onChange={(event) => updateAddress("city", event.target.value)}
-                      />
+                      >
+                        <option value="" disabled>
+                          {address.division ? "Select your district" : "Select a division first"}
+                        </option>
+                        {(districtsByDivision[
+                          address.division as keyof typeof districtsByDivision
+                        ] ?? []).map((district) => (
+                          <option key={district} value={district}>
+                            {district}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                     <label className="text-sm font-medium text-dark-900">
                       Postal code <span className="font-normal text-muted-400">(optional)</span>
@@ -200,7 +333,7 @@ export default function CheckoutPage() {
                 <aside className="h-fit rounded-2xl border border-brand-300 bg-white p-5">
                   <h2 className="font-semibold text-dark-900">Order summary</h2>
                   <ul className="mt-4 max-h-60 space-y-3 overflow-y-auto border-b border-brand-200 pb-4">
-                    {items.map(({ product, quantity }) => (
+                    {checkoutItems.map(({ product, quantity }) => (
                       <li key={product._id} className="flex justify-between gap-3 text-sm">
                         <span className="text-muted-500">{product.name} × {quantity}</span>
                         <span className="shrink-0 font-medium text-dark-900">

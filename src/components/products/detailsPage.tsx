@@ -11,9 +11,9 @@ import {
   Truck,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ProductType } from "@/types/AllDataType";
-import OrderSummaryCard from "../cards/orderSummaryCard";
 import { useCart } from "@/lib/cart/cartContext";
 import { useWishlist } from "@/lib/wishlist/wishlistContext";
 
@@ -37,9 +37,9 @@ export default function DetailsPage({
   const [activeTab, setActiveTab] = useState("Description");
   const [activeImage, setActiveImage] = useState(0);
   const { toggleWishlist, isWishlisted } = useWishlist();
+  const router = useRouter();
   const favorite = productData?._id ? isWishlisted(productData._id) : false;
-  const [order, setOrder] = useState(false);
-  const { addToCart, items } = useCart();
+  const { addToCart, prepareBuyNow, items } = useCart();
   const added = productData?._id ? items.some((i) => i.product?._id === productData._id) : false;
   const gallery: string[] = productData?.images?.length
     ? productData.images
@@ -57,13 +57,6 @@ export default function DetailsPage({
   const tabContent: Record<string, string> = {
     Description: productData?.description ?? "",
   };
-  if (order) {
-    return (
-      <div className="w-full">
-        <OrderSummaryCard productData={productData as ProductType} />
-      </div>
-    );
-  }
   return (
     <main className="min-h-screen pt-35.5 text-dark-900">
       <div className="mx-auto max-w-screen-2xl px-4 py-5 sm:px-7 lg:px-10">
@@ -180,11 +173,12 @@ export default function DetailsPage({
               <span className="text-2xl font-semibold text-brand-deep">
                 ৳ {Math.round(Number(productData?.finalPrice ?? productData?.price ?? 0)).toLocaleString()}
               </span>
-              {productData?.finalPrice && productData.finalPrice < (productData?.price ?? Infinity) && (
-                <span className="text-base text-muted-400 line-through">
-                  ৳ {Math.round(Number(productData.price)).toLocaleString()}
-                </span>
-              )}
+              {productData?.finalPrice != null &&
+                productData.finalPrice < (productData.price ?? Infinity) && (
+                  <del className="text-base text-muted-400">
+                    ৳ {Math.round(Number(productData.price)).toLocaleString()}
+                  </del>
+                )}
               {productData?.discountPercentage && productData.discountPercentage > 0 ? (
                 <span className="rounded-md bg-brand-700 px-2 py-0.5 text-xs font-bold text-white">
                   -{productData.discountPercentage}%
@@ -238,7 +232,9 @@ export default function DetailsPage({
 
               <button
                 onClick={() => {
-                  setOrder(true);
+                  if (!productData) return;
+                  prepareBuyNow(productData, quantity);
+                  router.push("/checkout");
                 }}
                 className="h-12 rounded-md bg-dark-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-dark-900 active:scale-[0.99]"
               >

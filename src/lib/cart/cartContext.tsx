@@ -9,7 +9,10 @@ export type CartItem = {
 
 type CartContextType = {
   items: CartItem[];
+  checkoutProductId: string | null;
   addToCart: (product: ProductType, qty?: number) => void;
+  prepareBuyNow: (product: ProductType, quantity: number) => void;
+  clearCheckoutSelection: () => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -21,6 +24,7 @@ const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [checkoutProductId, setCheckoutProductId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -52,6 +56,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const prepareBuyNow = useCallback((product: ProductType, quantity: number) => {
+    setCheckoutProductId(product._id);
+    setItems((prev) => {
+      const existing = prev.find((item) => item.product._id === product._id);
+      if (existing) {
+        return prev.map((item) =>
+          item.product._id === product._id ? { ...item, product, quantity } : item,
+        );
+      }
+      return [...prev, { product, quantity }];
+    });
+  }, []);
+
+  const clearCheckoutSelection = useCallback(() => {
+    setCheckoutProductId(null);
+  }, []);
+
   const removeFromCart = useCallback((productId: string) => {
     setItems((prev) => prev.filter((i) => i.product._id !== productId));
   }, []);
@@ -73,7 +94,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }}
+      value={{ items, checkoutProductId, addToCart, prepareBuyNow, clearCheckoutSelection, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }}
     >
       {children}
     </CartContext.Provider>

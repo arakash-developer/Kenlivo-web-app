@@ -80,6 +80,7 @@ export interface ShippingAddress {
   fullName: string;
   phone: string;
   street: string;
+  division?: string;
   city: string;
   postalCode?: string;
   country: string;
