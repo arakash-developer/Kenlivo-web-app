@@ -67,7 +67,7 @@ export function Navbar() {
               <Search className="pointer-events-none absolute left-3.5 size-4 text-muted-500" aria-hidden="true" />
               <input
                 type="search"
-                name="q"
+                name="search"
                 placeholder="Search products, brands and more..."
                 className="h-full w-full rounded-full border border-brand-400 bg-white pr-12 pl-10 text-sm text-dark-900 outline-none placeholder:text-muted-400 focus:border-brand-700/50 focus:ring-2 focus:ring-brand-700/10"
               />

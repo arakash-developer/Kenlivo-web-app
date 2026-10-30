@@ -62,6 +62,8 @@ function TrendingCard({ product }: { product: ProductType }) {
   const img = product.images?.[0] || product.imageUrl;
   const price = product.finalPrice ?? product.price ?? 0;
   const originalPrice = product.discountPercentage && product.discountPercentage > 0 ? product.price : null;
+  const formatPrice = (value: number) =>
+    new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number(value));
 
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-brand-300 bg-white shadow-sm transition hover:shadow-md">
@@ -102,8 +104,8 @@ function TrendingCard({ product }: { product: ProductType }) {
           <span className="ml-1 text-[11px] text-muted-500">({product.numReviews ?? 0})</span>
         </div>
         <div className="mt-1.5 flex items-center gap-2">
-          <span className="text-base font-bold text-brand-700">৳{Math.round(Number(price)).toLocaleString()}</span>
-          {originalPrice && <span className="text-xs text-muted-400 line-through">৳{Math.round(Number(originalPrice)).toLocaleString()}</span>}
+          <span className="text-base font-bold text-brand-700">৳{formatPrice(price)}</span>
+          {originalPrice && <span className="text-xs text-muted-400 line-through">৳{formatPrice(originalPrice)}</span>}
         </div>
         <button
           onClick={() => addToCart(product)}

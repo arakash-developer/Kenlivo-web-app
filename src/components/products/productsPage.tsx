@@ -266,6 +266,7 @@ function ProductsPageInner({
   const router = useRouter();
 
   const categoryParam = searchParams.get("category") ?? "";
+  const searchTerm = (searchParams.get("search") ?? searchParams.get("q") ?? "").trim();
   const pageParam = Number(searchParams.get("page") ?? "1");
   const isAllCollectionsRoute = collectionSlug === "allcollection";
 
@@ -317,6 +318,7 @@ function ProductsPageInner({
     page: pageParam,
     limit: 12,
     sort,
+    ...(searchTerm ? { search: searchTerm } : {}),
     ...(selectedCategory ? { category: selectedCategory } : {}),
     ...(routeCollection && !isAllCollectionsRoute ? { collection: routeCollection._id } : {}),
   };

@@ -1,7 +1,7 @@
 export interface ProductType {
   _id: string
   name: string
-  category: string
+  category: string | { _id?: string; name: string; slug?: string }
   price: number
   finalPrice?: number
   discountPercentage?: number

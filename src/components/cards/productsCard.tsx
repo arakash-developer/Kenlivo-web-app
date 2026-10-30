@@ -68,7 +68,7 @@ export default function ProductCard({ product }: { product: ProductType }) {
         <Link href={`products/${product._id}`}>
           {/* Category */}
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-700">
-            {product.category}
+            {typeof product.category === "string" ? product.category : product.category?.name}
           </p>
 
           {/* Product Name */}

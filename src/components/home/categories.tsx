@@ -46,7 +46,7 @@ export function Categories() {
           </div>
         ) : (
           <Carousel opts={{ align: "start" }}>
-            <CarouselContent className="-ml-8">
+            <CarouselContent className="-ml-8 justify-between">
               {active.map((cat) => (
                 <CarouselItem
                   key={cat._id}

@@ -46,6 +46,14 @@ export default function DetailsPage({
     : productData?.imageUrl
     ? [productData.imageUrl]
     : [];
+  const categoryName =
+    typeof productData?.category === "string"
+      ? productData.category
+      : productData?.category?.name ?? "";
+  const categorySlug =
+    typeof productData?.category === "string"
+      ? productData.category
+      : productData?.category?.slug ?? productData?.category?._id ?? "";
   const tabContent: Record<string, string> = {
     Description: productData?.description ?? "",
   };
@@ -67,10 +75,10 @@ export default function DetailsPage({
             </Link>
             <ChevronRight size={13} />
             <Link
-              href={`/category/${(productData?.category as any)?.slug ?? productData?.category ?? ""}`}
+              href={`/category/${encodeURIComponent(categorySlug)}`}
               className="transition hover:text-brand-deep"
             >
-              {(productData?.category as any)?.name ?? productData?.category}
+              {categoryName}
             </Link>
             <ChevronRight size={13} />
             <span className="text-brand-deep">{productData?.name}</span>
@@ -149,7 +157,7 @@ export default function DetailsPage({
           {/* Product information */}
           <div className="flex flex-col">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-brand-600">
-              {(productData?.category as any)?.name ?? productData?.category}
+              {categoryName}
             </p>
 
             <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">

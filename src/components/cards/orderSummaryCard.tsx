@@ -32,6 +32,11 @@ export default function OrderSummaryCard({
   const bookDiscount = discount * quantity;
   const subtotal = price * quantity;
   const shippingFee = shipping === "outside" ? 100 : 60;
+  const productImage = productData.images?.[0] || productData.imageUrl;
+  const categoryName =
+    typeof productData.category === "string"
+      ? productData.category
+      : productData.category?.name ?? "";
   // const Discount = discount*quantity ;
   const total = Math.max(0, subtotal /*- Discount*/ + shippingFee);
 
@@ -169,20 +174,26 @@ export default function OrderSummaryCard({
                       <div className="flex justify-between gap-2">
                         <div className="grid gap-2">
                           <div className="flex gap-2">
-                            <Image
-                              src={productData?.imageUrl as string}
-                              alt={productData.name}
-                              width={50}
-                              height={50}
-                              className="rounded-md border border-[#F0DAD9] object-cover"
-                            />
+                            {productImage ? (
+                              <Image
+                                src={productImage}
+                                alt={productData.name}
+                                width={50}
+                                height={50}
+                                className="rounded-md border border-[#F0DAD9] object-cover"
+                              />
+                            ) : (
+                              <div className="flex size-[50px] items-center justify-center rounded-md border border-[#F0DAD9] bg-white">
+                                <ShoppingBag className="size-5 text-[#D96C83]" />
+                              </div>
+                            )}
                             <p className="text-[#382A2B]">
                               {productData?.name}
                               {productData?.volume ? (
                                 <span className="ml-1 text-xs text-[#A99A9A]">{productData.volume} mL</span>
                               ) : null}
                               <br />
-                              <span className="text-xs text-[#A99A9A]">{productData?.category}</span>
+                              <span className="text-xs text-[#A99A9A]">{categoryName}</span>
                             </p>
                           </div>
 

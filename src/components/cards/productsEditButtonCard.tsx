@@ -3,20 +3,24 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ProductType } from "@/types/AllDataType";
 import { Save, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CiEdit } from "react-icons/ci";
 
 export function EditButton({ product }: { product: ProductType }) {
-  const [form, setForm] = useState<ProductType>(product);
+  return <EditButtonForm key={product._id} product={product} />;
+}
 
-  useEffect(() => {
-    setForm(product);
-  }, [product]);
+function EditButtonForm({ product }: { product: ProductType }) {
+  const [form, setForm] = useState<ProductType>(product);
 
   const update = (field: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [field]: value }));
 
   const {_id, ...updetedData} = form
+  const categoryValue =
+    typeof form.category === "string"
+      ? form.category
+      : form.category?._id ?? "";
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const res = await fetch(`${process.env.NEXT_PUBLIC_KENLIVO_DATA_API}products/${_id}`, {
@@ -45,7 +49,7 @@ export function EditButton({ product }: { product: ProductType }) {
       name: "category",
       label: "Category",
       type: "select",
-      value: form.category,
+      value: categoryValue,
       options: ["Cream", "Face Wash", "Lotion", "Sunscreen", "Serum"],
     },
     {

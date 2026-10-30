@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const page = Math.max(1, Number(sp.get("page") ?? 1));
   const limit = Math.min(100, Math.max(1, Number(sp.get("limit") ?? 20)));
-  const search = sp.get("search") ?? "";
+  const search = (sp.get("search") ?? sp.get("q") ?? "").trim();
   const categoryId = sp.get("category") ?? "";
   const collectionId = sp.get("collection") ?? "";
   const sortParam = sp.get("sort") ?? "-createdAt";
