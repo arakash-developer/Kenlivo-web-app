@@ -83,7 +83,7 @@ export default function CartPage() {
                             >
                               {product.name}
                             </Link>
-                            <p className="text-[11px] text-muted-400 capitalize">{typeof product.category === "string" ? product.category : (product.category as any)?.name}</p>
+                            <p className="text-[11px] text-muted-400 capitalize">{typeof product.category === "string" ? product.category : product.category?.name}</p>
 
                             <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
                               {/* Price */}

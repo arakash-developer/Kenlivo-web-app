@@ -2,8 +2,21 @@ import { Suspense } from "react";
 import DetailsPage from "@/components/products/detailsPage";
 import { Navbar } from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import { getDb, toId } from "@/lib/v1/db";
+import { getDb, ObjectId, toId } from "@/lib/v1/db";
 import { ProductType } from "@/types/AllDataType";
+
+function toSerializable(value: unknown): unknown {
+  if (value instanceof ObjectId) return value.toHexString();
+  if (value instanceof Date) return value.toISOString();
+  if (value instanceof Uint8Array) return Array.from(value);
+  if (Array.isArray(value)) return value.map(toSerializable);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [key, toSerializable(nested)]),
+    );
+  }
+  return value;
+}
 
 export default async function ProductDetailsPage({
   params,
@@ -24,11 +37,10 @@ export default async function ProductDetailsPage({
           $addFields: {
             _id: { $toString: "$_id" },
             "category._id": { $toString: "$category._id" },
-            collection: { $toString: "$collection" },
           },
         },
       ]).toArray();
-      data = (product ?? null) as ProductType | null;
+      data = product ? (toSerializable(product) as ProductType) : null;
     }
   } catch {
     // data stays null
