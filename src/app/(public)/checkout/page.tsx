@@ -7,7 +7,7 @@ import { ArrowLeft, CheckCircle2, ShoppingBag } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { useCart } from "@/lib/cart/cartContext";
-import { ordersApi } from "@/lib/api/orders";
+import { ordersApi, type ShippingZone } from "@/lib/api/orders";
 import { getApiErrorMessage } from "@/lib/api/axios";
 import type { ShippingAddress } from "@/lib/api/types";
 
@@ -134,6 +134,8 @@ function CheckoutContent() {
   const [orderId, setOrderId] = useState("");
   const [shippingFees, setShippingFees] = useState<ShippingFees | null>(null);
   const [shippingSettingsError, setShippingSettingsError] = useState("");
+  const [shippingZone, setShippingZone] =
+    useState<ShippingZone>("outside_kurigram");
   useEffect(() => {
     let active = true;
     fetch("/api/v1/shipping-settings")
@@ -165,13 +167,12 @@ function CheckoutContent() {
     };
   }, []);
 
-  const isInsideKurigram = address.city === "Kurigram";
   const deliveryFee = shippingFees
-    ? isInsideKurigram
+    ? shippingZone === "inside_kurigram"
       ? shippingFees.insideKurigram
       : shippingFees.outsideKurigram
     : 0;
-  const grandTotal = totalPrice + (items.length > 0 ? deliveryFee : 0);
+  const grandTotal = totalPrice + (checkoutItems.length > 0 ? deliveryFee : 0);
 
   const updateAddress = (field: keyof ShippingAddress, value: string) => {
     setAddress((current) => ({ ...current, [field]: value }));
@@ -191,6 +192,7 @@ function CheckoutContent() {
         })),
         shippingAddress: address,
         paymentMethod: "cash_on_delivery",
+        shippingZone,
       });
       if (checkoutProductId) removeFromCart(checkoutProductId);
       else clearCart();
@@ -373,54 +375,92 @@ function CheckoutContent() {
                   </fieldset>
                 </section>
 
-                <aside className="h-fit rounded-2xl border border-brand-300 bg-white p-5">
-                  <h2 className="font-semibold text-dark-900">Order summary</h2>
-                  <ul className="mt-4 max-h-60 space-y-3 overflow-y-auto border-b border-brand-200 pb-4">
-                    {checkoutItems.map(({ product, quantity }) => (
-                      <li key={product._id} className="flex justify-between gap-3 text-sm">
-                        <span className="text-muted-500">{product.name} × {quantity}</span>
-                        <span className="shrink-0 font-medium text-dark-900">
-                          ৳{((product.finalPrice ?? product.price) * quantity).toLocaleString()}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-4 space-y-3 text-sm">
-                    <div className="flex justify-between text-muted-500">
-                      <span>Subtotal ({totalItems} items)</span>
-                      <span>৳{totalPrice.toLocaleString()}</span>
+                <div className="grid h-fit gap-4">
+                  <section className="rounded-2xl border border-brand-300 bg-white p-5">
+                    <h2 className="font-semibold text-dark-900">Delivery area</h2>
+                    <p className="mt-1 text-sm text-muted-500">
+                      Select your delivery area and charge.
+                    </p>
+                    <div className="mt-4 grid gap-3">
+                      {([
+                        ["inside_kurigram", "Inside Kurigram", shippingFees?.insideKurigram],
+                        ["outside_kurigram", "Outside Kurigram", shippingFees?.outsideKurigram],
+                      ] as const).map(([zone, label, fee]) => (
+                        <label
+                          key={zone}
+                          className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-3 text-sm transition ${
+                            shippingZone === zone
+                              ? "border-brand-700 bg-brand-50"
+                              : "border-brand-300"
+                          }`}
+                        >
+                          <span className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="shippingZone"
+                              value={zone}
+                              checked={shippingZone === zone}
+                              onChange={() => setShippingZone(zone)}
+                            />
+                            <span className="font-medium text-dark-900">{label}</span>
+                          </span>
+                          <span className="font-semibold text-dark-900">
+                            {shippingSettingsError
+                              ? "Unavailable"
+                              : fee === undefined
+                                ? "Loading..."
+                                : `৳${fee.toLocaleString()}`}
+                          </span>
+                        </label>
+                      ))}
                     </div>
-                    <div className="flex justify-between text-muted-500">
-                      <span>
-                        Delivery ({address.city
-                          ? isInsideKurigram
+                  </section>
+
+                  <aside className="h-fit rounded-2xl border border-brand-300 bg-white p-5">
+                    <h2 className="font-semibold text-dark-900">Order summary</h2>
+                    <ul className="mt-4 max-h-60 space-y-3 overflow-y-auto border-b border-brand-200 pb-4">
+                      {checkoutItems.map(({ product, quantity }) => (
+                        <li key={product._id} className="flex justify-between gap-3 text-sm">
+                          <span className="text-muted-500">{product.name} × {quantity}</span>
+                          <span className="shrink-0 font-medium text-dark-900">
+                            ৳{((product.finalPrice ?? product.price) * quantity).toLocaleString()}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-4 space-y-3 text-sm">
+                      <div className="flex justify-between text-muted-500">
+                        <span>Subtotal ({totalItems} items)</span>
+                        <span>৳{totalPrice.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-muted-500">
+                        <span>
+                          Delivery ({shippingZone === "inside_kurigram"
                             ? "Inside Kurigram"
-                            : "Outside Kurigram"
-                          : "Select district"})
-                      </span>
-                      <span>
-                        {shippingSettingsError
-                          ? "Unavailable"
-                          : !shippingFees
-                            ? "Loading..."
-                            : address.city
-                              ? `৳${deliveryFee.toLocaleString()}`
-                              : "Select district"}
-                      </span>
+                            : "Outside Kurigram"})
+                        </span>
+                        <span>
+                          {shippingSettingsError
+                            ? "Unavailable"
+                            : !shippingFees
+                              ? "Loading..."
+                              : `৳${deliveryFee.toLocaleString()}`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-t border-brand-200 pt-3 font-bold text-dark-900">
+                        <span>Total</span>
+                        <span className="text-brand-700">৳{grandTotal.toLocaleString()}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between border-t border-brand-200 pt-3 font-bold text-dark-900">
-                      <span>Total</span>
-                      <span className="text-brand-700">৳{grandTotal.toLocaleString()}</span>
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={submitting || !shippingFees || Boolean(shippingSettingsError)}
-                    className="mt-5 w-full rounded-xl bg-brand-700 py-3 text-sm font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {submitting ? "Placing order..." : "Place order"}
-                  </button>
-                </aside>
+                    <button
+                      type="submit"
+                      disabled={submitting || !shippingFees || Boolean(shippingSettingsError)}
+                      className="mt-5 w-full rounded-xl bg-brand-700 py-3 text-sm font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {submitting ? "Placing order..." : "Place order"}
+                    </button>
+                  </aside>
+                </div>
               </form>
             </>
           )}

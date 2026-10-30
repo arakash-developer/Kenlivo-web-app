@@ -8,10 +8,13 @@ import type {
   ShippingAddress,
 } from "./types";
 
+export type ShippingZone = "inside_kurigram" | "outside_kurigram";
+
 export interface CreateOrderPayload {
   items: Array<{ product: string; quantity: number }>;
   shippingAddress: ShippingAddress;
   paymentMethod: PaymentMethod;
+  shippingZone: ShippingZone;
 }
 
 export const ordersApi = {

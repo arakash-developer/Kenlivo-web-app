@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   if (!body) return err("Invalid JSON");
 
-  const { items, shippingAddress, paymentMethod } = body;
+  const { items, shippingAddress, paymentMethod, shippingZone } = body;
   if (
     !Array.isArray(items) ||
     items.length === 0 ||
@@ -82,6 +82,8 @@ export async function POST(req: Request) {
     !shippingAddress.division?.trim() ||
     !shippingAddress.city?.trim() ||
     !paymentMethod ||
+    (shippingZone !== "inside_kurigram" &&
+      shippingZone !== "outside_kurigram") ||
     !items.every(isOrderItem)
   ) {
     return err("items, shippingAddress and paymentMethod are required");
@@ -91,9 +93,7 @@ export async function POST(req: Request) {
   const shippingSettings = await db
     .collection<ShippingSettings>("settings")
     .findOne({ _id: "shipping" });
-  const isInsideKurigram =
-    shippingAddress.city.trim().toLowerCase() === "kurigram";
-  const shippingFee = isInsideKurigram
+  const shippingFee = shippingZone === "inside_kurigram"
     ? typeof shippingSettings?.insideKurigram === "number"
       ? shippingSettings.insideKurigram
       : 60
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
     user: result.user.sub,
     items: orderItems,
     shippingAddress,
-    shippingZone: isInsideKurigram ? "inside_kurigram" : "outside_kurigram",
+    shippingZone,
     paymentMethod,
     itemsTotal,
     shippingFee,
