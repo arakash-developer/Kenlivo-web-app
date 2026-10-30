@@ -267,6 +267,7 @@ function ProductsPageInner({
 
   const categoryParam = searchParams.get("category") ?? "";
   const pageParam = Number(searchParams.get("page") ?? "1");
+  const isAllCollectionsRoute = collectionSlug === "allcollection";
 
   const [sort, setSort] = useState("-rating");
   const [selectedPrice, setSelectedPrice] = useState(-1);
@@ -292,7 +293,7 @@ function ProductsPageInner({
       )
     : undefined;
   const selectedCategory = categorySlug ? routeCategory?._id ?? "" : categoryParam;
-  const selectedFacet = collectionSlug
+  const selectedFacet = collectionSlug && !isAllCollectionsRoute
     ? routeCollection?._id ?? ""
     : selectedCategory;
   const facetItems = collectionSlug
@@ -303,10 +304,10 @@ function ProductsPageInner({
     if (categorySlug && catData && !routeCategory) {
       router.replace("/products");
     }
-    if (collectionSlug && collections && !routeCollection) {
+    if (collectionSlug && !isAllCollectionsRoute && collections && !routeCollection) {
       router.replace("/products");
     }
-  }, [categorySlug, catData, routeCategory, collectionSlug, collections, routeCollection, router]);
+  }, [categorySlug, catData, routeCategory, collectionSlug, isAllCollectionsRoute, collections, routeCollection, router]);
 
   const heroCat = categorySlug
     ? routeCategory
@@ -317,17 +318,18 @@ function ProductsPageInner({
     limit: 12,
     sort,
     ...(selectedCategory ? { category: selectedCategory } : {}),
-    ...(routeCollection ? { collection: routeCollection._id } : {}),
+    ...(routeCollection && !isAllCollectionsRoute ? { collection: routeCollection._id } : {}),
   };
 
   const { data, isLoading } = useProducts(
     queryParams,
-    !collectionSlug || Boolean(routeCollection)
+    !collectionSlug || isAllCollectionsRoute || Boolean(routeCollection)
   );
   const isPageLoading =
     isLoading ||
     (Boolean(categorySlug) && (isCategoriesLoading || !routeCategory)) ||
-    (Boolean(collectionSlug) && (isCollectionsLoading || !routeCollection));
+    (Boolean(collectionSlug) &&
+      (isCollectionsLoading || (!isAllCollectionsRoute && !routeCollection)));
   const products = (data?.items ?? []).filter((p) => {
     if (selectedRating > 0 && p.rating < selectedRating) return false;
     if (selectedPrice >= 0) {
@@ -347,6 +349,11 @@ function ProductsPageInner({
 
   const handleCategory = (id: string) => {
     if (collectionSlug) {
+      if (!id) {
+        router.push("/collections/allcollection");
+        return;
+      }
+
       const collection = collections?.find((item) => item._id === id);
       router.push(
         collection
@@ -376,7 +383,11 @@ function ProductsPageInner({
   const clearFilters = () => {
     setSelectedPrice(-1);
     setSelectedRating(0);
-    router.push(collectionSlug ? `/collections/${encodeURIComponent(collectionSlug)}` : "/products");
+    router.push(
+      collectionSlug
+        ? `/collections/${encodeURIComponent(collectionSlug)}`
+        : "/products"
+    );
   };
 
   return (
@@ -395,17 +406,23 @@ function ProductsPageInner({
           <nav className="mb-3 flex items-center gap-1.5 text-xs text-[#987b7e]">
             <Link href="/" className="hover:text-[#c96778]">Home</Link>
             <span>/</span>
-            <span className="text-[#492a30]">{routeCollection?.name ?? heroCat?.name ?? "Products"}</span>
+            <span className="text-[#492a30]">
+              {isAllCollectionsRoute
+                ? "All Collections"
+                : routeCollection?.name ?? heroCat?.name ?? "Products"}
+            </span>
           </nav>
           <h1 className="font-heading text-4xl font-bold text-[#2B2622] md:text-5xl">
-            {routeCollection?.name ?? heroCat?.name ?? "All Products"}
+            {isAllCollectionsRoute
+              ? "All Collections"
+              : routeCollection?.name ?? heroCat?.name ?? "All Products"}
           </h1>
           {(routeCollection?.description || heroCat?.description) && (
             <p className="mt-2 max-w-xl text-sm text-[#65454b] md:text-base">
               {routeCollection?.description || heroCat?.description}
             </p>
           )}
-          {!heroCat && !routeCollection && (
+          {!heroCat && !routeCollection && !isAllCollectionsRoute && (
             <p className="mt-2 text-sm text-[#65454b]">Discover our full collection</p>
           )}
         </div>
