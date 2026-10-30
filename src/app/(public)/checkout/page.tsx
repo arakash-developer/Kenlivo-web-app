@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { isAxiosError } from "axios";
 import { ArrowLeft, CheckCircle2, ShoppingBag } from "lucide-react";
@@ -97,6 +97,11 @@ const districtsByDivision = {
 const inputClass =
   "mt-1.5 h-11 w-full rounded-lg border border-brand-300 bg-white px-3 text-sm text-dark-900 outline-none focus:border-brand-700 focus:ring-2 focus:ring-brand-700/10";
 
+interface ShippingFees {
+  insideKurigram: number;
+  outsideKurigram: number;
+}
+
 export default function CheckoutPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-bg-page" />}>
@@ -127,7 +132,45 @@ function CheckoutContent() {
   const [needsLogin, setNeedsLogin] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState("");
-  const deliveryFee = totalPrice >= 1000 ? 0 : 60;
+  const [shippingFees, setShippingFees] = useState<ShippingFees | null>(null);
+  const [shippingSettingsError, setShippingSettingsError] = useState("");
+  useEffect(() => {
+    let active = true;
+    fetch("/api/v1/shipping-settings")
+      .then(async (response) => {
+        const result = (await response.json()) as {
+          success: boolean;
+          data?: ShippingFees;
+          message?: string;
+        };
+        if (!response.ok || !result.success || !result.data) {
+          throw new Error(result.message || "Could not load delivery charges.");
+        }
+        return result.data;
+      })
+      .then((fees) => {
+        if (active) setShippingFees(fees);
+      })
+      .catch((requestError: unknown) => {
+        if (active) {
+          setShippingSettingsError(
+            requestError instanceof Error
+              ? requestError.message
+              : "Could not load delivery charges.",
+          );
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const isInsideKurigram = address.city === "Kurigram";
+  const deliveryFee = shippingFees
+    ? isInsideKurigram
+      ? shippingFees.insideKurigram
+      : shippingFees.outsideKurigram
+    : 0;
   const grandTotal = totalPrice + (items.length > 0 ? deliveryFee : 0);
 
   const updateAddress = (field: keyof ShippingAddress, value: string) => {
@@ -348,8 +391,22 @@ function CheckoutContent() {
                       <span>৳{totalPrice.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-muted-500">
-                      <span>Delivery</span>
-                      <span>{deliveryFee === 0 ? "Free" : `৳${deliveryFee}`}</span>
+                      <span>
+                        Delivery ({address.city
+                          ? isInsideKurigram
+                            ? "Inside Kurigram"
+                            : "Outside Kurigram"
+                          : "Select district"})
+                      </span>
+                      <span>
+                        {shippingSettingsError
+                          ? "Unavailable"
+                          : !shippingFees
+                            ? "Loading..."
+                            : address.city
+                              ? `৳${deliveryFee.toLocaleString()}`
+                              : "Select district"}
+                      </span>
                     </div>
                     <div className="flex justify-between border-t border-brand-200 pt-3 font-bold text-dark-900">
                       <span>Total</span>
@@ -358,7 +415,7 @@ function CheckoutContent() {
                   </div>
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || !shippingFees || Boolean(shippingSettingsError)}
                     className="mt-5 w-full rounded-xl bg-brand-700 py-3 text-sm font-bold text-white transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {submitting ? "Placing order..." : "Place order"}

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { getDb, toId, paginate } from "@/lib/v1/db";
+import { getDb, toId, paginate, type ShippingSettings } from "@/lib/v1/db";
+import type { ObjectId } from "mongodb";
 import { requireAdmin, requireAuth, ok, created, err } from "@/lib/v1/response";
 
 function buildOrderFilter(sp: URLSearchParams, extraFilter: Record<string, unknown> = {}) {
@@ -7,6 +8,27 @@ function buildOrderFilter(sp: URLSearchParams, extraFilter: Record<string, unkno
   const status = sp.get("status");
   if (status) filter.status = status;
   return filter;
+}
+
+function isOrderItem(
+  item: unknown,
+): item is { product: string; quantity: number } {
+  if (
+    typeof item !== "object" ||
+    item === null ||
+    !("product" in item) ||
+    !("quantity" in item)
+  ) {
+    return false;
+  }
+
+  return (
+    typeof item.product === "string" &&
+    toId(item.product) !== null &&
+    typeof item.quantity === "number" &&
+    Number.isSafeInteger(item.quantity) &&
+    item.quantity > 0
+  );
 }
 
 export async function GET(req: NextRequest) {
@@ -49,12 +71,38 @@ export async function POST(req: Request) {
   if (!body) return err("Invalid JSON");
 
   const { items, shippingAddress, paymentMethod } = body;
-  if (!items?.length || !shippingAddress || !paymentMethod) {
+  if (
+    !Array.isArray(items) ||
+    items.length === 0 ||
+    !shippingAddress ||
+    typeof shippingAddress !== "object" ||
+    !shippingAddress.fullName?.trim() ||
+    !shippingAddress.phone?.trim() ||
+    !shippingAddress.street?.trim() ||
+    !shippingAddress.division?.trim() ||
+    !shippingAddress.city?.trim() ||
+    !paymentMethod ||
+    !items.every(isOrderItem)
+  ) {
     return err("items, shippingAddress and paymentMethod are required");
   }
 
   const db = await getDb();
-  const productIds = items.map((i: { product: string }) => toId(i.product)).filter(Boolean);
+  const shippingSettings = await db
+    .collection<ShippingSettings>("settings")
+    .findOne({ _id: "shipping" });
+  const isInsideKurigram =
+    shippingAddress.city.trim().toLowerCase() === "kurigram";
+  const shippingFee = isInsideKurigram
+    ? typeof shippingSettings?.insideKurigram === "number"
+      ? shippingSettings.insideKurigram
+      : 60
+    : typeof shippingSettings?.outsideKurigram === "number"
+      ? shippingSettings.outsideKurigram
+      : 100;
+  const productIds = items
+    .map((item: { product: string }) => toId(item.product))
+    .filter((id: ObjectId | null): id is ObjectId => id !== null);
   const products = await db.collection("products").find({ _id: { $in: productIds } }).toArray();
 
   let itemsTotal = 0;
@@ -66,7 +114,6 @@ export async function POST(req: Request) {
     return { product: item.product, name: prod.name, price, quantity: item.quantity };
   });
 
-  const shippingFee = itemsTotal >= 1000 ? 0 : 60;
   const grandTotal = itemsTotal + shippingFee;
   const now = new Date();
 
@@ -74,6 +121,7 @@ export async function POST(req: Request) {
     user: result.user.sub,
     items: orderItems,
     shippingAddress,
+    shippingZone: isInsideKurigram ? "inside_kurigram" : "outside_kurigram",
     paymentMethod,
     itemsTotal,
     shippingFee,

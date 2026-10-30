@@ -1,5 +1,11 @@
 import { MongoClient, ObjectId, type Db } from "mongodb";
 
+export interface ShippingSettings {
+  _id: string;
+  insideKurigram?: number;
+  outsideKurigram?: number;
+}
+
 const uri = process.env.MONGODB_URI as string;
 const dbName = process.env.DB_NAME ?? "kenlivo";
 

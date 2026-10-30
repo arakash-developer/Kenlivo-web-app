@@ -14,8 +14,6 @@ export default function CartPage() {
     totalItems,
     totalPrice,
   } = useCart();
-  const deliveryFee = totalPrice >= 1000 ? 0 : 60;
-  const grandTotal = totalPrice + (items.length > 0 ? deliveryFee : 0);
 
   return (
     <>
@@ -156,11 +154,11 @@ export default function CartPage() {
                     </div>
                     <div className="flex justify-between text-muted-500">
                       <span>Delivery Fee</span>
-                      <span>{deliveryFee === 0 ? "Free" : `৳${deliveryFee}`}</span>
+                      <span>Calculated at checkout</span>
                     </div>
                     <div className="border-t border-brand-200 pt-3 flex justify-between font-bold text-dark-900">
                       <span>Total</span>
-                      <span className="text-brand-700">৳{grandTotal.toLocaleString()}</span>
+                      <span className="text-brand-700">৳{totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
                   <div className="px-5 pb-5">
