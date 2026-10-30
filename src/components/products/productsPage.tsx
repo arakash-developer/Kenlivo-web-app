@@ -114,27 +114,31 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 function FilterSidebar({
-  categories,
-  selectedCategory,
+  facetLabel,
+  facetItems,
+  selectedFacet,
+  allFacetsLabel,
   selectedPrice,
   selectedRating,
-  onCategory,
+  onFacet,
   onPrice,
   onRating,
   onClear,
   onClose,
 }: {
-  categories: { _id: string; name: string }[];
-  selectedCategory: string;
+  facetLabel: string;
+  facetItems: { _id: string; name: string }[];
+  selectedFacet: string;
+  allFacetsLabel: string;
   selectedPrice: number;
   selectedRating: number;
-  onCategory: (id: string) => void;
+  onFacet: (id: string) => void;
   onPrice: (idx: number) => void;
   onRating: (r: number) => void;
   onClear: () => void;
   onClose?: () => void;
 }) {
-  const hasFilters = selectedCategory || selectedPrice >= 0 || selectedRating > 0;
+  const hasFilters = selectedFacet || selectedPrice >= 0 || selectedRating > 0;
 
   return (
     <aside className="w-full space-y-5">
@@ -154,32 +158,31 @@ function FilterSidebar({
         </div>
       </div>
 
-      {/* Category */}
       <div className="border-t border-[#f0dde0] pt-4">
         <p className="mb-3 flex items-center justify-between text-sm font-semibold text-[#492a30]">
-          Category <ChevronDown className="size-4 text-[#987b7e]" />
+          {facetLabel} <ChevronDown className="size-4 text-[#987b7e]" />
         </p>
         <div className="space-y-2">
           <label className="flex cursor-pointer items-center gap-2">
             <input
               type="radio"
-              name="category"
-              checked={!selectedCategory}
-              onChange={() => onCategory("")}
+              name={facetLabel}
+              checked={!selectedFacet}
+              onChange={() => onFacet("")}
               className="accent-[#c96778]"
             />
-            <span className="text-sm text-[#65454b]">All Categories</span>
+            <span className="text-sm text-[#65454b]">{allFacetsLabel}</span>
           </label>
-          {categories.map((c) => (
-            <label key={c._id} className="flex cursor-pointer items-center gap-2">
+          {facetItems.map((item) => (
+            <label key={item._id} className="flex cursor-pointer items-center gap-2">
               <input
                 type="radio"
-                name="category"
-                checked={selectedCategory === c._id}
-                onChange={() => onCategory(c._id)}
+                name={facetLabel}
+                checked={selectedFacet === item._id}
+                onChange={() => onFacet(item._id)}
                 className="accent-[#c96778]"
               />
-              <span className="text-sm text-[#65454b]">{c.name}</span>
+              <span className="text-sm text-[#65454b]">{item.name}</span>
             </label>
           ))}
         </div>
@@ -289,6 +292,12 @@ function ProductsPageInner({
       )
     : undefined;
   const selectedCategory = categorySlug ? routeCategory?._id ?? "" : categoryParam;
+  const selectedFacet = collectionSlug
+    ? routeCollection?._id ?? ""
+    : selectedCategory;
+  const facetItems = collectionSlug
+    ? collections ?? []
+    : activeCategories;
 
   useEffect(() => {
     if (categorySlug && catData && !routeCategory) {
@@ -337,6 +346,16 @@ function ProductsPageInner({
   };
 
   const handleCategory = (id: string) => {
+    if (collectionSlug) {
+      const collection = collections?.find((item) => item._id === id);
+      router.push(
+        collection
+          ? `/collections/${encodeURIComponent(collection.slug || collection.name.toLowerCase().replace(/\s+/g, "-"))}`
+          : "/products"
+      );
+      return;
+    }
+
     if (categorySlug) {
       const category = activeCategories.find((c) => c._id === id);
       router.push(
@@ -397,11 +416,13 @@ function ProductsPageInner({
           {/* Desktop Sidebar */}
           <div className="hidden w-56 shrink-0 lg:block">
             <FilterSidebar
-              categories={activeCategories}
-              selectedCategory={selectedCategory}
+              facetLabel={collectionSlug ? "Collection" : "Category"}
+              facetItems={facetItems}
+              selectedFacet={selectedFacet}
+              allFacetsLabel={collectionSlug ? "All Collections" : "All Categories"}
               selectedPrice={selectedPrice}
               selectedRating={selectedRating}
-              onCategory={handleCategory}
+              onFacet={handleCategory}
               onPrice={setSelectedPrice}
               onRating={setSelectedRating}
               onClear={clearFilters}
@@ -526,11 +547,13 @@ function ProductsPageInner({
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileFilterOpen(false)} />
           <div className="relative ml-auto h-full w-72 overflow-y-auto bg-white p-5 shadow-xl">
             <FilterSidebar
-              categories={activeCategories}
-              selectedCategory={selectedCategory}
+              facetLabel={collectionSlug ? "Collection" : "Category"}
+              facetItems={facetItems}
+              selectedFacet={selectedFacet}
+              allFacetsLabel={collectionSlug ? "All Collections" : "All Categories"}
               selectedPrice={selectedPrice}
               selectedRating={selectedRating}
-              onCategory={(id) => { handleCategory(id); setMobileFilterOpen(false); }}
+              onFacet={(id) => { handleCategory(id); setMobileFilterOpen(false); }}
               onPrice={setSelectedPrice}
               onRating={setSelectedRating}
               onClear={() => { clearFilters(); setMobileFilterOpen(false); }}
