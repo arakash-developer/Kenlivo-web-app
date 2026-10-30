@@ -1,7 +1,25 @@
 import { api } from "./axios";
-import type { ApiEnvelope, Order, OrderListQuery, OrderStatus } from "./types";
+import type {
+  ApiEnvelope,
+  Order,
+  OrderListQuery,
+  OrderStatus,
+  PaymentMethod,
+  ShippingAddress,
+} from "./types";
+
+export interface CreateOrderPayload {
+  items: Array<{ product: string; quantity: number }>;
+  shippingAddress: ShippingAddress;
+  paymentMethod: PaymentMethod;
+}
 
 export const ordersApi = {
+  async create(payload: CreateOrderPayload) {
+    const { data } = await api.post<ApiEnvelope<{ _id: string }>>("/orders", payload);
+    return data.data;
+  },
+
   async listAll(query: OrderListQuery = {}) {
     const { data } = await api.get<ApiEnvelope<Order[]>>("/orders", { params: query });
     return { items: data.data, meta: data.meta };

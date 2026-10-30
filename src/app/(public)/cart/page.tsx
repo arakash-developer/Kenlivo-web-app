@@ -5,12 +5,10 @@ import { useCart } from "@/lib/cart/cartContext";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag, ChevronRight } from "lucide-react";
 
-const DELIVERY_FEE = 60;
-
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, totalItems, totalPrice } = useCart();
-
-  const grandTotal = totalPrice + (items.length > 0 ? DELIVERY_FEE : 0);
+  const deliveryFee = totalPrice >= 1000 ? 0 : 60;
+  const grandTotal = totalPrice + (items.length > 0 ? deliveryFee : 0);
 
   return (
     <>
@@ -151,7 +149,7 @@ export default function CartPage() {
                     </div>
                     <div className="flex justify-between text-muted-500">
                       <span>Delivery Fee</span>
-                      <span>৳{DELIVERY_FEE}</span>
+                      <span>{deliveryFee === 0 ? "Free" : `৳${deliveryFee}`}</span>
                     </div>
                     <div className="border-t border-brand-200 pt-3 flex justify-between font-bold text-dark-900">
                       <span>Total</span>
@@ -159,9 +157,12 @@ export default function CartPage() {
                     </div>
                   </div>
                   <div className="px-5 pb-5">
-                    <button className="w-full rounded-xl bg-brand-700 py-3 text-sm font-bold text-white transition hover:bg-brand-800 active:scale-[0.98]">
+                    <Link
+                      href="/checkout"
+                      className="block w-full rounded-xl bg-brand-700 py-3 text-center text-sm font-bold text-white transition hover:bg-brand-800 active:scale-[0.98]"
+                    >
                       Proceed to Checkout
-                    </button>
+                    </Link>
                     <p className="mt-3 text-center text-[11px] text-muted-400">
                       Free delivery on orders over ৳1,000
                     </p>

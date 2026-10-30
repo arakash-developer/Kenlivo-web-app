@@ -20,7 +20,13 @@ export default async function ProductDetailsPage({
         { $match: { _id: oid } },
         { $lookup: { from: "categories", localField: "category", foreignField: "_id", as: "category" } },
         { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
-        { $addFields: { _id: { $toString: "$_id" }, "category._id": { $toString: "$category._id" } } },
+        {
+          $addFields: {
+            _id: { $toString: "$_id" },
+            "category._id": { $toString: "$category._id" },
+            collection: { $toString: "$collection" },
+          },
+        },
       ]).toArray();
       data = (product ?? null) as ProductType | null;
     }
