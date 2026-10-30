@@ -53,7 +53,7 @@ export function Categories() {
                   className="basis-1/2 pl-8 sm:basis-1/3 lg:basis-1/4 xl:basis-1/6"
                 >
                   <Link
-                    href={`/products?category=${cat._id}`}
+                    href={`/category/${encodeURIComponent(cat.slug || cat.name.toLowerCase().replace(/\s+/g, "-"))}`}
                     className="group flex flex-col items-center gap-4 text-center"
                   >
                     <span className="relative isolate block aspect-square w-full max-w-54 overflow-hidden rounded-full bg-[linear-gradient(180deg,#FDEBE5_0%,#F8D2C8_100%)] transition-transform duration-300 ease-out group-hover:-translate-y-1">
