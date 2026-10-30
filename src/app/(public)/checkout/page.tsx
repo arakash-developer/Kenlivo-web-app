@@ -2,13 +2,13 @@
 
 import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { isAxiosError } from "axios";
 import { ArrowLeft, CheckCircle2, ShoppingBag } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { useCart } from "@/lib/cart/cartContext";
 import { ordersApi, type ShippingZone } from "@/lib/api/orders";
 import { getApiErrorMessage } from "@/lib/api/axios";
+import { tokenStore } from "@/lib/api/token-store";
 import type { ShippingAddress } from "@/lib/api/types";
 
 const initialAddress: ShippingAddress = {
@@ -129,9 +129,9 @@ function CheckoutContent() {
   );
   const [address, setAddress] = useState(initialAddress);
   const [error, setError] = useState("");
-  const [needsLogin, setNeedsLogin] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState("");
+  const [canViewOrders, setCanViewOrders] = useState(false);
   const [shippingFees, setShippingFees] = useState<ShippingFees | null>(null);
   const [shippingSettingsError, setShippingSettingsError] = useState("");
   const [shippingZone, setShippingZone] =
@@ -181,7 +181,6 @@ function CheckoutContent() {
   async function placeOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setNeedsLogin(false);
     setSubmitting(true);
 
     try {
@@ -197,14 +196,10 @@ function CheckoutContent() {
       if (checkoutProductId) removeFromCart(checkoutProductId);
       else clearCart();
       clearCheckoutSelection();
+      setCanViewOrders(Boolean(tokenStore.get()));
       setOrderId(order._id);
     } catch (requestError) {
-      if (isAxiosError(requestError) && requestError.response?.status === 401) {
-        setNeedsLogin(true);
-        setError("Please sign in before placing your order.");
-      } else {
-        setError(getApiErrorMessage(requestError, "Your order could not be placed."));
-      }
+      setError(getApiErrorMessage(requestError, "Your order could not be placed."));
     } finally {
       setSubmitting(false);
     }
@@ -231,10 +226,10 @@ function CheckoutContent() {
                 Your order number is <span className="font-semibold text-dark-900">{orderId}</span>.
               </p>
               <Link
-                href="/profile"
+                href={canViewOrders ? "/profile" : "/products"}
                 className="mt-6 inline-flex rounded-xl bg-brand-700 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-800"
               >
-                View my orders
+                {canViewOrders ? "View my orders" : "Continue shopping"}
               </Link>
             </section>
           ) : checkoutItems.length === 0 ? (
@@ -260,12 +255,7 @@ function CheckoutContent() {
 
                   {error && (
                     <div role="alert" className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-                      {error}{" "}
-                      {needsLogin && (
-                        <Link href="/login" className="font-semibold underline">
-                          Sign in
-                        </Link>
-                      )}
+                      {error}
                     </div>
                   )}
 

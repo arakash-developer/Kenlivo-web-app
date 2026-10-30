@@ -88,7 +88,7 @@ export interface ShippingAddress {
 
 export interface Order {
   _id: string;
-  user: string | { _id: string; name: string; email: string };
+  user?: string | null | { _id: string; name: string; email: string };
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   paymentMethod: PaymentMethod;

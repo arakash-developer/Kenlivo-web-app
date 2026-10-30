@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getDb, toId, paginate, type ShippingSettings } from "@/lib/v1/db";
 import type { ObjectId } from "mongodb";
-import { requireAdmin, requireAuth, ok, created, err } from "@/lib/v1/response";
+import { authenticate, requireAdmin, ok, created, err } from "@/lib/v1/response";
 
 function buildOrderFilter(sp: URLSearchParams, extraFilter: Record<string, unknown> = {}) {
   const filter: Record<string, unknown> = { ...extraFilter };
@@ -64,8 +64,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: Request) {
-  const result = await requireAuth(req);
-  if ("cookies" in result) return result;
+  const user = await authenticate(req);
 
   const body = await req.json().catch(() => null);
   if (!body) return err("Invalid JSON");
@@ -118,7 +117,7 @@ export async function POST(req: Request) {
   const now = new Date();
 
   const { insertedId } = await db.collection("orders").insertOne({
-    user: result.user.sub,
+    user: user?.sub ?? null,
     items: orderItems,
     shippingAddress,
     shippingZone,
