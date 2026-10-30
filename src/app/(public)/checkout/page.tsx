@@ -8,7 +8,6 @@ import Footer from "@/components/layout/footer";
 import { useCart } from "@/lib/cart/cartContext";
 import { ordersApi, type ShippingZone } from "@/lib/api/orders";
 import { getApiErrorMessage } from "@/lib/api/axios";
-import { tokenStore } from "@/lib/api/token-store";
 import type { ShippingAddress } from "@/lib/api/types";
 
 const initialAddress: ShippingAddress = {
@@ -196,7 +195,7 @@ function CheckoutContent() {
       if (checkoutProductId) removeFromCart(checkoutProductId);
       else clearCart();
       clearCheckoutSelection();
-      setCanViewOrders(Boolean(tokenStore.get()));
+      setCanViewOrders(order.isAuthenticated);
       setOrderId(order._id);
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, "Your order could not be placed."));

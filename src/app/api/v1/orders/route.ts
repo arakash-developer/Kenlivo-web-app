@@ -131,5 +131,8 @@ export async function POST(req: Request) {
     updatedAt: now,
   });
 
-  return created({ _id: insertedId.toString() }, "Order placed");
+  return created(
+    { _id: insertedId.toString(), isAuthenticated: Boolean(user) },
+    "Order placed",
+  );
 }

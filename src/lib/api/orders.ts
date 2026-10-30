@@ -19,7 +19,9 @@ export interface CreateOrderPayload {
 
 export const ordersApi = {
   async create(payload: CreateOrderPayload) {
-    const { data } = await api.post<ApiEnvelope<{ _id: string }>>("/orders", payload);
+    const { data } = await api.post<
+      ApiEnvelope<{ _id: string; isAuthenticated: boolean }>
+    >("/orders", payload);
     return data.data;
   },
 
